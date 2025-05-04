@@ -1,10 +1,10 @@
-package edu.microchat.biogen;
+package edu.microchat.assistant;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BiogenApplicationTests {
+class AssistantApplicationTests {
 
 	@Test
 	void contextLoads() {
