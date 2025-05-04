@@ -1,14 +1,23 @@
 package edu.microchat.message;
 
 import java.util.List;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
 class MessageService {
+  private final String promptsQueueName;
+  private final AmqpTemplate amqpTemplate;
   private final MessageRepository messageRepository;
 
-  public MessageService(MessageRepository messageRepository) {
+  public MessageService(
+      @Value("${microchat.queues.assistant-prompts}") String promptsQueueName,
+      AmqpTemplate amqpTemplate,
+      MessageRepository messageRepository) {
+    this.promptsQueueName = promptsQueueName;
+    this.amqpTemplate = amqpTemplate;
     this.messageRepository = messageRepository;
   }
 
@@ -20,15 +29,27 @@ class MessageService {
         .toList();
   }
 
-  public List<MessageResponse> getUnprocessedBySenderId(long senderId) {
-    return messageRepository.findBySenderIdAndIsProcessedFalse(senderId).stream()
-        .map(MessageService::mapToMessageResponse)
-        .toList();
-  }
-
   public long create(MessageCreateRequest request) {
     var message = mapToMessage(request);
+
+    System.out.println("User message: " + message.getContent());
+
+    if (message.isAssistantPrompt()) {
+      // TODO: edit message format
+      amqpTemplate.convertAndSend(promptsQueueName, message.getContent());
+    }
+
     return messageRepository.save(message).getId();
+  }
+
+  // TODO: redesign the method
+  public void createFromAssistantReply(String reply) {
+    long ASSISTANT_ID = 1;
+    var message = new Message(ASSISTANT_ID, reply);
+
+    System.out.println("Reply: " + message.getContent());
+
+    messageRepository.save(message).getId();
   }
 
   private static Message mapToMessage(MessageCreateRequest request) {

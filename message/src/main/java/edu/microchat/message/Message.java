@@ -7,14 +7,13 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 class Message extends AbstractPersistable<Long> {
+  public static final String ASSITANT_MENTION = "/assistant";
+
   @Column(nullable = false, updatable = false)
   private long senderId;
 
   @Column(nullable = false, updatable = false)
   private String content;
-
-  @Column(nullable = false, updatable = true)
-  private boolean isProcessed;
 
   @Column(nullable = false, updatable = false)
   private LocalDateTime timestamp;
@@ -27,10 +26,6 @@ class Message extends AbstractPersistable<Long> {
     this.timestamp = LocalDateTime.now();
   }
 
-  public void markAsProcessed() {
-    this.isProcessed = true;
-  }
-
   public long getSenderId() {
     return senderId;
   }
@@ -39,11 +34,11 @@ class Message extends AbstractPersistable<Long> {
     return content;
   }
 
-  public boolean isProcessed() {
-    return isProcessed;
-  }
-
   public LocalDateTime getTimestamp() {
     return timestamp;
+  }
+
+  public boolean isAssistantPrompt() {
+    return content.contains(ASSITANT_MENTION);
   }
 }

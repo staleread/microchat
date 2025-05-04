@@ -5,7 +5,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.ListCrudRepository;
 
 interface MessageRepository extends ListCrudRepository<Message, Long> {
-  List<Message> findBySenderIdAndIsProcessedFalse(long senderId);
-
   List<Message> findAllByOrderByTimestampDesc(Pageable pageable);
 }

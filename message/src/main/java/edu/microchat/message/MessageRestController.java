@@ -20,12 +20,6 @@ class MessageRestController {
     this.messageService = messageService;
   }
 
-  @GetMapping("/unprocessed")
-  public List<MessageResponse> getUnprocessedBySenderId(
-      @Positive @RequestParam("senderId") long senderId) {
-    return messageService.getUnprocessedBySenderId(senderId);
-  }
-
   @GetMapping("/")
   public List<MessageResponse> getAll(
       @PositiveOrZero @RequestParam("page") int page, @Positive @RequestParam("count") int count) {
