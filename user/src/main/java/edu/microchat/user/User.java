@@ -20,6 +20,11 @@ class User extends AbstractPersistable<Long> {
     this.username = username;
   }
 
+  public User(String username, String bio) {
+    this.username = username;
+    this.bio = bio;
+  }
+
   public String getUsername() {
     return username;
   }
