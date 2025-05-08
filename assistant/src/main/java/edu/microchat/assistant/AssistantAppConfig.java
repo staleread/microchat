@@ -1,5 +1,6 @@
 package edu.microchat.assistant;
 
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -10,6 +11,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 class AssistantAppConfig {
+  @Bean
+  public ChatClient chatClient(ChatClient.Builder chatClientBuilder) {
+    return chatClientBuilder.build();
+  }
+
   @Bean
   public Queue assistantPromptsQueue(@Value("${microchat.queues.assistant-prompts}") String name) {
     return new Queue(name);
