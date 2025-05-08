@@ -1,4 +1,4 @@
-package edu.microchat.message;
+package edu.microchat.message.message;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;

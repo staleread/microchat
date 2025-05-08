@@ -1,4 +1,4 @@
-package edu.microchat.message;
+package edu.microchat.message.message;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

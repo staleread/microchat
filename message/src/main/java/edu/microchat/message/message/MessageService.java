@@ -1,6 +1,12 @@
-package edu.microchat.message;
+package edu.microchat.message.message;
 
+import edu.microchat.message.assistant.AssistantApiClient;
+import edu.microchat.message.assistant.AssistantPromptDto;
+import edu.microchat.message.assistant.AssistantReplyEvent;
+import edu.microchat.message.user.UserApiClient;
+import edu.microchat.message.user.UserDto;
 import java.util.List;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -40,8 +46,9 @@ class MessageService {
     return messageRepository.save(message).getId();
   }
 
-  public void createFromAssistantReply(AssistantReplyDto dto) {
-    var message = Message.assistantMessage(dto.reply());
+  @EventListener
+  public void handleAssistantReply(AssistantReplyEvent event) {
+    var message = Message.assistantMessage(event.reply());
 
     messageRepository.save(message).getId();
   }

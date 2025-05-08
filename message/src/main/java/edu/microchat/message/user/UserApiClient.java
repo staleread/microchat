@@ -1,4 +1,4 @@
-package edu.microchat.message;
+package edu.microchat.message.user;
 
 import jakarta.validation.Valid;
 import org.springframework.cloud.client.ServiceInstance;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-class UserApiClient {
+public class UserApiClient {
   private final DiscoveryClient discoveryClient;
   private final RestTemplate restTemplate;
 
