@@ -24,7 +24,7 @@ class UserRestController {
     return userService.getAll();
   }
 
-  @GetMapping("/:id")
+  @GetMapping("/{id}")
   public UserResponse getById(@Positive @PathVariable long id) {
     return userService.getById(id);
   }
