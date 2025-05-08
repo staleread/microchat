@@ -1,32 +1,21 @@
 package edu.microchat.message;
 
 import java.util.List;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 class MessageService {
-  private final String promptsQueueName;
-  private final RabbitTemplate rabbitTemplate;
-  private final DiscoveryClient discoveryClient;
-  private final RestTemplate restTemplate;
+  private final AssistantApiClient assistantApiClient;
+  private final UserApiClient userApiClient;
   private final MessageRepository messageRepository;
 
   public MessageService(
-      @Value("${microchat.queues.assistant-prompts}") String promptsQueueName,
-      RabbitTemplate rabbitTemplate,
-      DiscoveryClient discoveryClient,
-      RestTemplate restTemplate,
+      AssistantApiClient assistantApiClientService,
+      UserApiClient userApiClient,
       MessageRepository messageRepository) {
-    this.promptsQueueName = promptsQueueName;
-    this.rabbitTemplate = rabbitTemplate;
-    this.discoveryClient = discoveryClient;
-    this.restTemplate = restTemplate;
+    this.assistantApiClient = assistantApiClientService;
+    this.userApiClient = userApiClient;
     this.messageRepository = messageRepository;
   }
 
@@ -39,12 +28,13 @@ class MessageService {
   }
 
   public long create(MessageCreateRequest request) {
-    var message = mapToMessage(request);
-
-    System.out.println("User message: " + message.getContent());
+    Message message = mapToMessage(request);
 
     if (message.isAssistantPrompt()) {
-      sendAssistantPrompt(message);
+      UserDto user = userApiClient.getUserById(message.getSenderId());
+      AssistantPromptDto dto = mapToAssistantPromptDto(user, message);
+
+      assistantApiClient.sendAssistantPrompt(dto);
     }
 
     return messageRepository.save(message).getId();
@@ -53,25 +43,14 @@ class MessageService {
   public void createFromAssistantReply(AssistantReplyDto dto) {
     var message = Message.assistantMessage(dto.reply());
 
-    System.out.println("Reply: " + message.getContent());
-
     messageRepository.save(message).getId();
   }
 
-  private void sendAssistantPrompt(Message message) {
-    ServiceInstance userServiceInstance = discoveryClient.getInstances("user").getFirst();
-    String userGetEndpoint =
-        userServiceInstance.getUri() + "/api/v1/users/" + message.getSenderId();
-
-    // TODO: add user response validation
-    UserDto userResponse = restTemplate.getForEntity(userGetEndpoint, UserDto.class).getBody();
-
+  private static AssistantPromptDto mapToAssistantPromptDto(UserDto userDto, Message message) {
     var messageSender =
-        new AssistantPromptDto.MessageSender(
-            userResponse.id(), userResponse.username(), userResponse.bio());
-    var dto = new AssistantPromptDto(messageSender, message.getContent());
+        new AssistantPromptDto.MessageSender(userDto.id(), userDto.username(), userDto.bio());
 
-    rabbitTemplate.convertAndSend(promptsQueueName, dto);
+    return new AssistantPromptDto(messageSender, message.getContent());
   }
 
   private static Message mapToMessage(MessageCreateRequest request) {
