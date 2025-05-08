@@ -35,11 +35,10 @@ class MessageService {
 
   public long create(MessageCreateRequest request) {
     Message message = mapToMessage(request);
+    UserDto user = userApiClient.getUserById(message.getSenderId());
 
     if (message.isAssistantPrompt()) {
-      UserDto user = userApiClient.getUserById(message.getSenderId());
       AssistantPromptDto dto = mapToAssistantPromptDto(user, message);
-
       assistantApiClient.sendAssistantPrompt(dto);
     }
 

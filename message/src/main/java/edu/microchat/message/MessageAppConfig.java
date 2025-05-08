@@ -1,5 +1,6 @@
 package edu.microchat.message;
 
+import edu.microchat.message.common.RestTemplateResponseErrorHandler;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -13,7 +14,10 @@ import org.springframework.web.client.RestTemplate;
 class MessageAppConfig {
   @Bean
   public RestTemplate restTemplate() {
-    return new RestTemplate();
+    var restTemplate = new RestTemplate();
+    restTemplate.setErrorHandler(new RestTemplateResponseErrorHandler());
+
+    return restTemplate;
   }
 
   @Bean
