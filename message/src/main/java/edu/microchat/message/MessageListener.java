@@ -11,8 +11,10 @@ class MessageListener {
     this.messageService = messageService;
   }
 
-  @RabbitListener(queues = "${microchat.queues.assistant-replies}")
-  public void handleAssistantReply(String reply) {
-    messageService.createFromAssistantReply(reply);
+  @RabbitListener(
+      queues = "${microchat.queues.assistant-replies}",
+      messageConverter = "jsonConverter")
+  public void handleAssistantReply(AssistantReplyDto dto) {
+    messageService.createFromAssistantReply(dto);
   }
 }

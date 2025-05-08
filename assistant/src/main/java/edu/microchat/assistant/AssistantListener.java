@@ -11,8 +11,10 @@ class AssistantListener {
     this.assistantService = assistantService;
   }
 
-  @RabbitListener(queues = "${microchat.queues.assistant-prompts}")
-  public void handleUserPrompt(String prompt) {
-    assistantService.processPrompt(prompt);
+  @RabbitListener(
+      queues = "${microchat.queues.assistant-prompts}",
+      messageConverter = "jsonConverter")
+  public void handleUserPrompt(AssistantPromptDto dto) {
+    assistantService.processPrompt(dto);
   }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Entity
 class Message extends AbstractPersistable<Long> {
   public static final String ASSITANT_MENTION = "/assistant";
+  public static final long ASSISTANT_ID = 0;
 
   @Column(nullable = false, updatable = false)
   private long senderId;
@@ -17,6 +18,10 @@ class Message extends AbstractPersistable<Long> {
 
   @Column(nullable = false, updatable = false)
   private LocalDateTime timestamp;
+
+  public static Message assistantMessage(String content) {
+    return new Message(ASSISTANT_ID, content);
+  }
 
   public Message() {}
 

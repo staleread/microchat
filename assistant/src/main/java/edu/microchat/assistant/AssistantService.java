@@ -1,23 +1,23 @@
 package edu.microchat.assistant;
 
-import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 class AssistantService {
   private final String repliesQueueName;
-  private final AmqpTemplate amqpTemplate;
+  private final RabbitTemplate template;
 
   public AssistantService(
       @Value("${microchat.queues.assistant-replies}") String repliesQueueName,
-      AmqpTemplate amqpTemplate) {
+      RabbitTemplate template) {
     this.repliesQueueName = repliesQueueName;
-    this.amqpTemplate = amqpTemplate;
+    this.template = template;
   }
 
-  public void processPrompt(String prompt) {
-    var reply = "Assistant: " + prompt;
-    amqpTemplate.convertAndSend(repliesQueueName, reply);
+  public void processPrompt(AssistantPromptDto dto) {
+    var reply = new AssistantReplyDto("Assistant: " + dto.prompt());
+    template.convertAndSend(repliesQueueName, reply);
   }
 }
