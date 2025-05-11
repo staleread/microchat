@@ -29,7 +29,7 @@ class UserIntegrationTests {
   }
 
   @Test
-  void getAll_ListOf3Users() throws Exception {
+  void getAll_ListOfUsers() throws Exception {
     var users = List.of(new User("test1", "bio1"), new User("test2"), new User("test3"));
     userRepository.saveAll(users);
 
