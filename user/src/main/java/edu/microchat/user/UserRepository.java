@@ -4,4 +4,6 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-interface UserRepository extends ListCrudRepository<User, Long> {}
+interface UserRepository extends ListCrudRepository<User, Long> {
+  boolean existsByUsername(String username);
+}

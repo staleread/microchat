@@ -25,6 +25,10 @@ class UserService {
   }
 
   public Long create(UserCreateRequest request) {
+    if (userRepository.existsByUsername(request.username())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is already taken");
+    }
+
     User user = mapToUser(request);
     return userRepository.save(user).getId();
   }
