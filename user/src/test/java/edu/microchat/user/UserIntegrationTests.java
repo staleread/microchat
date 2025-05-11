@@ -75,8 +75,8 @@ class UserIntegrationTests {
   }
 
   @Test
-  void create_ValidUserRequest_CreatesUser() throws Exception {
-    var request = new UserCreateRequest("test1", "bio1");
+  void create_CreatesUser() throws Exception {
+    var request = new UserCreateRequest("test1", "test_bio1");
 
     MockHttpServletResponse response =
         mockMvc
@@ -93,14 +93,123 @@ class UserIntegrationTests {
 
     assertNotNull(createdUser);
     assertEquals("test1", createdUser.getUsername());
+    assertEquals("test_bio1", createdUser.getBio());
+  }
+
+  @Test
+  void create_NoBio_CreatesUser() throws Exception {
+    var request = new UserCreateRequest("test1", null);
+
+    MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                post("/api/v1/users/")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(toJson(request)))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse();
+
+    var userId = Long.parseLong(response.getContentAsString());
+    User createdUser = userRepository.findById(userId).orElse(null);
+
+    assertNotNull(createdUser);
+    assertEquals("test1", createdUser.getUsername());
+    assertNull(createdUser.getBio());
+  }
+
+  @Test
+  void create_MinBioLength_CreatesUser() throws Exception {
+    var request = new UserCreateRequest("test1", "bio1");
+
+    MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                post("/api/v1/users/")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(toJson(request)))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse();
+
+    var userId = Long.parseLong(response.getContentAsString());
+    User createdUser = userRepository.findById(userId).orElseThrow();
+
     assertEquals("bio1", createdUser.getBio());
   }
 
   @Test
-  void create_UsernameIsTaken_BadRequest() throws Exception {
-    userRepository.save(new User("nicolas"));
+  void create_MaxBioLength_CreatesUser() throws Exception {
+    var request =
+        new UserCreateRequest(
+            "test1",
+            "123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ");
 
-    var request = new UserCreateRequest("nicolas", "semidev");
+    MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                post("/api/v1/users/")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(toJson(request)))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse();
+
+    var userId = Long.parseLong(response.getContentAsString());
+    User createdUser = userRepository.findById(userId).orElseThrow();
+
+    assertEquals(
+        "123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ",
+        createdUser.getBio());
+  }
+
+  @Test
+  void create_BlankUsername_BadRequest() throws Exception {
+    var request = new UserCreateRequest("", "bio1");
+
+    mockMvc
+        .perform(
+            post("/api/v1/users/").contentType(MediaType.APPLICATION_JSON).content(toJson(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$").isMap())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$.username").value("must not be blank"));
+  }
+
+  @Test
+  void create_TooShortBio_BadRequest() throws Exception {
+    var request = new UserCreateRequest("username", "bio");
+
+    mockMvc
+        .perform(
+            post("/api/v1/users/").contentType(MediaType.APPLICATION_JSON).content(toJson(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$").isMap())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$.bio").value("length must be between 4 and 100"));
+  }
+
+  @Test
+  void create_TooLongBio_BadRequest() throws Exception {
+    var request =
+        new UserCreateRequest(
+            "username",
+            "123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1");
+
+    mockMvc
+        .perform(
+            post("/api/v1/users/").contentType(MediaType.APPLICATION_JSON).content(toJson(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$").isMap())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$.bio").value("length must be between 4 and 100"));
+  }
+
+  @Test
+  void create_DuplicateUsername_BadRequest() throws Exception {
+    userRepository.save(new User("test1"));
+
+    var request = new UserCreateRequest("test1", "bio1");
 
     mockMvc
         .perform(
