@@ -3,6 +3,7 @@ package edu.microchat.message.user;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class UserApiClient {
   }
 
   @Valid
-  public UserDto getUserById(long id) {
+  public Optional<UserDto> getUserById(long id) {
     String userGetEndpoint = getSomeUserInstanseUri() + "/api/v1/users/" + id;
 
     ResponseEntity<UserDto> userResponse =
@@ -32,14 +33,14 @@ public class UserApiClient {
     HttpStatusCode statusCode = userResponse.getStatusCode();
 
     if (statusCode == HttpStatus.NOT_FOUND) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+      return Optional.empty();
     }
 
     if (!statusCode.is2xxSuccessful()) {
       throw new ResponseStatusException(statusCode, "Failed to fetch user info");
     }
 
-    return userResponse.getBody();
+    return Optional.of(userResponse.getBody());
   }
 
   private URI getSomeUserInstanseUri() {
