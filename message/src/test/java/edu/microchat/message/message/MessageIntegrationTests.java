@@ -1,5 +1,7 @@
 package edu.microchat.message.message;
 
+import static java.util.concurrent.TimeUnit.*;
+import static org.awaitility.Awaitility.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -9,18 +11,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.microchat.message.assistant.AssistantApiClient;
 import edu.microchat.message.assistant.AssistantPromptDto;
+import edu.microchat.message.assistant.AssistantReplyDto;
 import edu.microchat.message.user.UserApiClient;
 import edu.microchat.message.user.UserDto;
-import java.util.List;
 import java.util.Optional;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
@@ -30,11 +35,11 @@ class MessageIntegrationTests {
   @Autowired private ObjectMapper objectMapper;
   @Autowired private MessageRepository messageRepository;
 
-  @MockitoBean private AssistantApiClient assistantApiClient;
+  @MockitoSpyBean private AssistantApiClient assistantApiClient;
   @MockitoBean private UserApiClient userApiClient;
 
   @AfterEach
-  void tearsDown() {
+  void tearDown() {
     messageRepository.deleteAll();
   }
 
@@ -77,15 +82,22 @@ class MessageIntegrationTests {
     assertNotNull(createdMessage);
     assertEquals("Hello there!", createdMessage.getContent());
     verify(assistantApiClient, times(0)).sendAssistantPrompt(any(AssistantPromptDto.class));
-    ;
   }
 
   @Test
-  void create_AssistantMessage_CreatesUserMessageAndTriggersAssistant() throws Exception {
+  void create_AssistantMessage_CreatesUserAndReplyMessages() throws Exception {
     var mockUserDto = new UserDto(1L, "user1", "bio1");
     when(userApiClient.getUserById(1L)).thenReturn(Optional.of(mockUserDto));
 
-    doNothing().when(assistantApiClient).sendAssistantPrompt(any(AssistantPromptDto.class));
+    var mockReplyDto = new AssistantReplyDto("Can't complaint, bro");
+
+    doAnswer(
+            invocation -> {
+              assistantApiClient.handleAssistantReply(mockReplyDto);
+              return null;
+            })
+        .when(assistantApiClient)
+        .sendAssistantPrompt(any(AssistantPromptDto.class));
 
     var messageRequest = new MessageCreateRequest(1L, "Mr. /assistant, how are you?");
 
@@ -96,10 +108,14 @@ class MessageIntegrationTests {
                 .content(toJson(messageRequest)))
         .andExpect(status().isOk());
 
-    List<Message> messages = messageRepository.findAll();
+    await().atMost(5, SECONDS).until(messageRepository::count, Matchers.equalTo(2L));
 
-    assertEquals(1, messages.size());
+    Message lastMessage =
+        messageRepository.findAllByOrderByTimestampDesc(PageRequest.of(0, 1)).getFirst();
+
     verify(assistantApiClient, times(1)).sendAssistantPrompt(any(AssistantPromptDto.class));
+    assertNotNull(lastMessage);
+    assertEquals("Can't complaint, bro", lastMessage.getContent());
   }
 
   @Test
