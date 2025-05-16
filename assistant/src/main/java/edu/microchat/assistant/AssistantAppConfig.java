@@ -6,11 +6,16 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@RefreshScope
 class AssistantAppConfig {
+  @Value("${microchat.queues.assistant-replies}")
+  private String assistantRepliesQueueName;
+
   @Bean
   public ChatClient chatClient(ChatClient.Builder chatClientBuilder) {
     return chatClientBuilder.build();
@@ -38,5 +43,9 @@ class AssistantAppConfig {
     template.setMessageConverter(jsonConverter);
 
     return template;
+  }
+
+  public String assistantRepliesQueueName() {
+    return assistantRepliesQueueName;
   }
 }

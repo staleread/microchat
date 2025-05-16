@@ -1,5 +1,6 @@
 package edu.microchat.message.message;
 
+import edu.microchat.message.MessageAppConfig;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -15,9 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1/messages")
 class MessageRestController {
   private final MessageService messageService;
+  private final MessageAppConfig appConfig;
 
-  public MessageRestController(MessageService messageService) {
+  public MessageRestController(MessageService messageService, MessageAppConfig appConfig) {
     this.messageService = messageService;
+    this.appConfig = appConfig;
   }
 
   @GetMapping("/")
@@ -29,5 +32,10 @@ class MessageRestController {
   @PostMapping("/")
   public long create(@Valid @RequestBody MessageCreateRequest request) {
     return messageService.create(request);
+  }
+
+  @GetMapping("/moto")
+  public String getProjectMoto() {
+    return appConfig.projectMoto();
   }
 }

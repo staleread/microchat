@@ -1,8 +1,8 @@
 package edu.microchat.message.assistant;
 
+import edu.microchat.message.MessageAppConfig;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +14,10 @@ public class AssistantApiClient {
 
   public AssistantApiClient(
       ApplicationEventPublisher eventPublisher,
-      @Value("${microchat.queues.assistant-prompts}") String promptsQueueName,
+      MessageAppConfig messageAppConfig,
       RabbitTemplate rabbitTemplate) {
     this.eventPublisher = eventPublisher;
-    this.promptsQueueName = promptsQueueName;
+    this.promptsQueueName = messageAppConfig.assistantPromptsQueueName();
     this.rabbitTemplate = rabbitTemplate;
   }
 

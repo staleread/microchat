@@ -6,7 +6,6 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,10 +15,10 @@ class AssistantService {
   private final ChatClient chatClient;
 
   public AssistantService(
-      @Value("${microchat.queues.assistant-replies}") String repliesQueueName,
+      AssistantAppConfig assistantAppConfig,
       RabbitTemplate template,
       ChatClient chatClient) {
-    this.repliesQueueName = repliesQueueName;
+    this.repliesQueueName = assistantAppConfig.assistantRepliesQueueName();
     this.template = template;
     this.chatClient = chatClient;
   }
