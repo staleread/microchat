@@ -1,5 +1,9 @@
 #! /usr/bin/bash
 
+# Check for health (Spring Boot Actuator)
+curl -s -X GET "$BASE_URL/actuator/health" \
+  | jq
+
 # Get all users
 curl -s -X GET $BASE_URL/api/v1/users/ \
   | jq
@@ -12,8 +16,8 @@ curl -s -X GET $BASE_URL/api/v1/users/1 \
 curl -s -X POST $BASE_URL/api/v1/users/ \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "Mykola",
-    "bio": "Is trying to submit the lab on time..."
+    "username": "Andrii",
+    "bio": "Just for assistance here"
   }' \
   | jq
 
