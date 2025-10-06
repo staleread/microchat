@@ -6,10 +6,12 @@ curl -s -X GET "$BASE_URL/actuator/health" \
 
 # Get messages
 curl -s -X GET "$BASE_URL/api/v1/messages/?page=0&count=5" \
+  -u "admin:admin" \
   | jq
 
 # Create message
 curl -s -X POST "$BASE_URL/api/v1/messages/" \
+  -u "admin:admin" \
   -H "Content-Type: application/json" \
   -d '{
     "senderId": 2,
@@ -18,4 +20,5 @@ curl -s -X POST "$BASE_URL/api/v1/messages/" \
   | jq
 
 # Get moto (For checking dynamic config reload witout service restart)
-curl -s -X GET "$BASE_URL/api/v1/messages/moto"
+curl -s -X GET "$BASE_URL/api/v1/messages/moto" \
+  -u "admin:admin"

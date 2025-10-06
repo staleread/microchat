@@ -6,14 +6,17 @@ curl -s -X GET "$BASE_URL/actuator/health" \
 
 # Get all users
 curl -s -X GET $BASE_URL/api/v1/users/ \
+  -H "Authorization: Basic $CREDENTIALS" \
   | jq
 
 # Get user by id
 curl -s -X GET $BASE_URL/api/v1/users/1 \
+  -u "admin:admin" \
   | jq
 
 # Create user
 curl -s -X POST $BASE_URL/api/v1/users/ \
+  -u "admin:admin" \
   -H "Content-Type: application/json" \
   -d '{
     "username": "Andrii",
@@ -23,6 +26,7 @@ curl -s -X POST $BASE_URL/api/v1/users/ \
 
 # Update user
 curl -s -X PUT $BASE_URL/api/v1/users/1 \
+  -u "admin:admin" \
   -H "Content-Type: application/json" \
   -d '{
     "username": "Mykola",
@@ -32,4 +36,5 @@ curl -s -X PUT $BASE_URL/api/v1/users/1 \
 
 # Delete user by id
 curl -s -X DELETE $BASE_URL/api/v1/users/1 \
+  -u "admin:admin" \
   | jq
