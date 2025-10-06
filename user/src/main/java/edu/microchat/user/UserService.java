@@ -33,6 +33,30 @@ class UserService {
     return userRepository.save(user).getId();
   }
 
+  public void update(long id, UserUpdateRequest request) {
+    User user =
+        userRepository
+            .findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+    if (!user.getUsername().equals(request.username())
+        && userRepository.existsByUsername(request.username())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is already taken");
+    }
+
+    user.setUsername(request.username());
+    user.setBio(request.bio());
+    userRepository.save(user);
+  }
+
+  public void delete(long id) {
+    if (!userRepository.existsById(id)) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+    }
+
+    userRepository.deleteById(id);
+  }
+
   private static User mapToUser(UserCreateRequest request) {
     return new User(request.username(), request.bio());
   }
