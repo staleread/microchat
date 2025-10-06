@@ -1,0 +1,19 @@
+#! /usr/bin/bash
+
+# Get messages
+curl -s -X GET "$BASE_URL/api/v1/messages/?page=1&count=5" \
+  | jq
+
+curl -s -G "$BASE_URL/api/v1/messages" \
+  --data-urlencode "page=1" \
+  --data-urlencode "count=5" \
+  | jq
+
+# Create message
+curl -s -X POST $BASE_URL/api/v1/messages/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "senderId": 1,
+    "content": "Hello, world!"
+  }' \
+  | jq

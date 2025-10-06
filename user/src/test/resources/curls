@@ -1,0 +1,31 @@
+#! /usr/bin/bash
+
+# Get all users
+curl -s -X GET $BASE_URL/api/v1/users/ \
+  | jq
+
+# Get user by id
+curl -s -X GET $BASE_URL/api/v1/users/1 \
+  | jq
+
+# Create user
+curl -s -X POST $BASE_URL/api/v1/users/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Mykola",
+    "bio": "Is trying to submit the lab on time..."
+  }' \
+  | jq
+
+# Update user
+curl -s -X PUT $BASE_URL/api/v1/users/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Mykola",
+    "bio": "Is NOT trying to submit the lab on time..."
+  }' \
+  | jq
+
+# Delete user by id
+curl -s -X DELETE $BASE_URL/api/v1/users/1 \
+  | jq
