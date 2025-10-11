@@ -15,6 +15,6 @@ class AssistantListener {
       queues = "${microchat.queues.assistant-prompts}",
       messageConverter = "jsonConverter")
   public void handleUserPrompt(AssistantPromptDto dto) {
-    assistantService.processPrompt(dto);
+    assistantService.processPromptMock(dto);
   }
 }

@@ -11,15 +11,13 @@ import org.springframework.stereotype.Service;
 @Service
 class AssistantService {
   private final String repliesQueueName;
-  private final RabbitTemplate template;
+  private final RabbitTemplate rabbitTemplate;
   private final ChatClient chatClient;
 
   public AssistantService(
-      AssistantAppConfig assistantAppConfig,
-      RabbitTemplate template,
-      ChatClient chatClient) {
+      AssistantAppConfig assistantAppConfig, RabbitTemplate rabbitTemplate, ChatClient chatClient) {
     this.repliesQueueName = assistantAppConfig.assistantRepliesQueueName();
-    this.template = template;
+    this.rabbitTemplate = rabbitTemplate;
     this.chatClient = chatClient;
   }
 
@@ -30,7 +28,13 @@ class AssistantService {
     var prompt = new Prompt(Arrays.asList(systemMessage, userMessage));
     String reply = chatClient.prompt(prompt).call().content();
 
-    template.convertAndSend(repliesQueueName, new AssistantReplyDto(reply));
+    rabbitTemplate.convertAndSend(repliesQueueName, new AssistantReplyDto(reply));
+  }
+
+  public void processPromptMock(AssistantPromptDto dto) {
+    String reply = "Sorry, AI is disabled";
+
+    rabbitTemplate.convertAndSend(repliesQueueName, new AssistantReplyDto(reply));
   }
 
   private SystemMessage toSystemMessage(AssistantPromptDto.MessageSender senderInfo) {

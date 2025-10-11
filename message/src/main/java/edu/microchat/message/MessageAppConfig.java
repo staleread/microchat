@@ -44,7 +44,7 @@ public class MessageAppConfig {
   }
 
   @Bean
-  public RabbitTemplate myRabbitTemplate(
+  public RabbitTemplate rabbitTemplate(
       ConnectionFactory connectionFactory, Jackson2JsonMessageConverter jsonConverter) {
     var template = new RabbitTemplate(connectionFactory);
     template.setMessageConverter(jsonConverter);
