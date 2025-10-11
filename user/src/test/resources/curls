@@ -1,40 +1,34 @@
-#! /usr/bin/bash
+#!/usr/bin/bash
 
 # Check for health (Spring Boot Actuator)
-curl -s -X GET "$BASE_URL/actuator/health" \
-  | jq
+curl -i -X GET "$USER_BASE_URL/actuator/health"
 
 # Get all users
-curl -s -X GET $BASE_URL/api/v1/users/ \
-  -H "Authorization: Basic $CREDENTIALS" \
-  | jq
+curl -i -X GET "$USER_BASE_URL/api/v1/users/" \
+  -u "$CREDENTIALS"
 
 # Get user by id
-curl -s -X GET $BASE_URL/api/v1/users/1 \
-  -u "admin:admin" \
-  | jq
+curl -i -X GET "$USER_BASE_URL/api/v1/users/1" \
+  -u "$CREDENTIALS"
 
 # Create user
-curl -s -X POST $BASE_URL/api/v1/users/ \
-  -u "admin:admin" \
+curl -i -X POST "$USER_BASE_URL/api/v1/users/" \
+  -u "$CREDENTIALS" \
   -H "Content-Type: application/json" \
   -d '{
     "username": "Andrii",
     "bio": "Just for assistance here"
-  }' \
-  | jq
+  }'
 
 # Update user
-curl -s -X PUT $BASE_URL/api/v1/users/1 \
-  -u "admin:admin" \
+curl -i -X PUT "$USER_BASE_URL/api/v1/users/1" \
+  -u "$CREDENTIALS" \
   -H "Content-Type: application/json" \
   -d '{
     "username": "Mykola",
     "bio": "Is NOT trying to submit the lab on time..."
-  }' \
-  | jq
+  }'
 
 # Delete user by id
-curl -s -X DELETE $BASE_URL/api/v1/users/1 \
-  -u "admin:admin" \
-  | jq
+curl -i -X DELETE "$USER_BASE_URL/api/v1/users/1" \
+  -u "$CREDENTIALS"

@@ -1,24 +1,21 @@
-#! /usr/bin/bash
+#!/usr/bin/bash
 
 # Check for health (Spring Boot Actuator)
-curl -s -X GET "$BASE_URL/actuator/health" \
-  | jq
+curl -i -X GET "$MESSAGE_BASE_URL/actuator/health"
 
 # Get messages
-curl -s -X GET "$BASE_URL/api/v1/messages/?page=0&count=5" \
-  -u "admin:admin" \
-  | jq
+curl -i -X GET "$MESSAGE_BASE_URL/api/v1/messages/?page=0&count=5" \
+  -u "$CREDENTIALS"
 
 # Create message
-curl -s -X POST "$BASE_URL/api/v1/messages/" \
-  -u "admin:admin" \
+curl -i -X POST "$MESSAGE_BASE_URL/api/v1/messages/" \
+  -u "$CREDENTIALS" \
   -H "Content-Type: application/json" \
   -d '{
-    "senderId": 2,
-    "content": "Hello, world!"
-  }' \
-  | jq
+    "senderId": 3,
+    "content": "It'\''s a chat btw"
+  }'
 
 # Get moto (For checking dynamic config reload witout service restart)
-curl -s -X GET "$BASE_URL/api/v1/messages/moto" \
-  -u "admin:admin"
+curl -i -X GET "$MESSAGE_BASE_URL/api/v1/messages/moto" \
+  -u "$CREDENTIALS"
