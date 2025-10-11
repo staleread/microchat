@@ -1,14 +1,15 @@
 #!/usr/bin/bash
 
-# Check for health (Spring Boot Actuator)
-curl -i -X GET "$USER_BASE_URL/actuator/health"
+# Check app health
+curl -i -X GET "$USER_BASE_URL/actuator/health" \
+  -u "$CREDENTIALS"
 
 # Get all users
 curl -i -X GET "$USER_BASE_URL/api/v1/users/" \
   -u "$CREDENTIALS"
 
-# Get user by id
-curl -i -X GET "$USER_BASE_URL/api/v1/users/1" \
+# Get user by ID
+curl -i -X GET "$USER_BASE_URL/api/v1/users/2" \
   -u "$CREDENTIALS"
 
 # Create user

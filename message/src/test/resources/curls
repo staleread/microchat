@@ -1,7 +1,8 @@
 #!/usr/bin/bash
 
 # Check for health (Spring Boot Actuator)
-curl -i -X GET "$MESSAGE_BASE_URL/actuator/health"
+curl -i -X GET "$MESSAGE_BASE_URL/actuator/health" \
+  -u "$CREDENTIALS"
 
 # Get messages
 curl -i -X GET "$MESSAGE_BASE_URL/api/v1/messages/?page=0&count=5" \
