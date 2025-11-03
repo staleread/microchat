@@ -1,0 +1,52 @@
+#!/usr/bin/bash
+
+# Check for health (Spring Boot Actuator)
+curl -i -X GET "$BASE_URL/actuator/health" \
+  -u "$CREDENTIALS"
+
+# Get all users
+curl -i -X GET "$BASE_URL/api/v1/users/" \
+  -u "$CREDENTIALS"
+
+# Get user by ID
+curl -i -X GET "$BASE_URL/api/v1/users/2" \
+  -u "$CREDENTIALS"
+
+# Create user
+curl -i -X POST "$BASE_URL/api/v1/users/" \
+  -u "$CREDENTIALS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Andrii",
+    "bio": "Just for assistance here"
+  }'
+
+# Update user
+curl -i -X PUT "$BASE_URL/api/v1/users/1" \
+  -u "$CREDENTIALS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Mykola",
+    "bio": "Is NOT trying to submit the lab on time..."
+  }'
+
+# Delete user by id
+curl -i -X DELETE "$BASE_URL/api/v1/users/1" \
+  -u "$CREDENTIALS"
+
+# Get messages
+curl -i -X GET "$BASE_URL/api/v1/messages/?page=0&count=5" \
+  -u "$CREDENTIALS"
+
+# Create message
+curl -i -X POST "$BASE_URL/api/v1/messages/" \
+  -u "$CREDENTIALS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "senderId": 53,
+    "content": "It'\''s a chat btw"
+  }'
+
+# Get moto (For checking dynamic config reload witout service restart)
+curl -i -X GET "$BASE_URL/api/v1/messages/moto" \
+  -u "$CREDENTIALS"
