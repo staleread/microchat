@@ -3,6 +3,7 @@ package edu.microchat.core;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -15,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class CoreAppSecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -25,12 +27,6 @@ public class CoreAppSecurityConfig {
                     .permitAll()
                     .requestMatchers("/actuator/health")
                     .permitAll()
-                    .requestMatchers("/api/v1/messages/moto")
-                    .hasRole("GUEST")
-                    .requestMatchers("/api/v1/messages/")
-                    .hasRole("USER")
-                    .requestMatchers("/api/v1/users/**")
-                    .hasRole("ADMIN")
                     .anyRequest()
                     .authenticated())
         .httpBasic(Customizer.withDefaults())
