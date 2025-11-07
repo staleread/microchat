@@ -19,7 +19,7 @@ class Message extends AbstractPersistable<Long> {
   @Column(nullable = false, updatable = false)
   private LocalDateTime timestamp;
 
-  public static Message assistantMessage(String content) {
+  public static Message createAssistantMessage(String content) {
     return new Message(ASSISTANT_ID, content);
   }
 

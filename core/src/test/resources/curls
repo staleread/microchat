@@ -1,52 +1,179 @@
 #!/usr/bin/bash
 
-# Check for health (Spring Boot Actuator)
-curl -i -X GET "$BASE_URL/actuator/health" \
-  -u "$CREDENTIALS"
+# Homepage
+curl -i -X GET "$BASE_URL/index.html"
 
-# Get all users
-curl -i -X GET "$BASE_URL/api/v1/users/" \
-  -u "$CREDENTIALS"
+# Check app health (Spring Boot Actuator)
+curl -i -X GET "$BASE_URL/actuator/health"
 
-# Get user by ID
-curl -i -X GET "$BASE_URL/api/v1/users/2" \
-  -u "$CREDENTIALS"
+# Get moto (without credentials) MUST FAIL
+curl -i -X GET "$BASE_URL/api/v1/messages/moto"
 
-# Create user
-curl -i -X POST "$BASE_URL/api/v1/users/" \
-  -u "$CREDENTIALS" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "Andrii",
-    "bio": "Just for assistance here"
-  }'
+# Get moto (as guest)
+curl -i -X GET "$BASE_URL/api/v1/messages/moto" \
+  -u "$GUEST_CREDS"
 
-# Update user
-curl -i -X PUT "$BASE_URL/api/v1/users/1" \
-  -u "$CREDENTIALS" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "Mykola",
-    "bio": "Is NOT trying to submit the lab on time..."
-  }'
+# Get moto (as user)
+curl -i -X GET "$BASE_URL/api/v1/messages/moto" \
+  -u "$USER_CREDS"
 
-# Delete user by id
-curl -i -X DELETE "$BASE_URL/api/v1/users/1" \
-  -u "$CREDENTIALS"
+# Get moto (as admin)
+curl -i -X GET "$BASE_URL/api/v1/messages/moto" \
+  -u "$ADMIN_CREDS"
 
-# Get messages
+# Get messages (without credentials) MUST FAIL!
+curl -i -X GET "$BASE_URL/api/v1/messages/?page=0&count=5"
+
+# Get messages (as guest) MUST FAIL!
 curl -i -X GET "$BASE_URL/api/v1/messages/?page=0&count=5" \
-  -u "$CREDENTIALS"
+  -u "$GUEST_CREDS"
 
-# Create message
-curl -i -X POST "$BASE_URL/api/v1/messages/" \
-  -u "$CREDENTIALS" \
+# Get messages (as user)
+curl -i -X GET "$BASE_URL/api/v1/messages/?page=0&count=5" \
+  -u "$USER_CREDS"
+
+# Get messages (as admin)
+curl -i -X GET "$BASE_URL/api/v1/messages/?page=0&count=5" \
+  -u "$ADMIN_CREDS"
+
+# Create message (without credentials) MUST FAIL
+curl -i -X POST "$BASE_URL/api/v0/messages/" \
   -H "Content-Type: application/json" \
   -d '{
     "senderId": 53,
-    "content": "It'\''s a chat btw"
+    "content": "Hello!"
   }'
 
-# Get moto (For checking dynamic config reload witout service restart)
-curl -i -X GET "$BASE_URL/api/v1/messages/moto" \
-  -u "$CREDENTIALS"
+# Create message (as user)
+curl -i -X POST "$BASE_URL/api/v1/messages/" \
+  -u "$USER_CREDS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "senderId": 53,
+    "content": "Hello!"
+  }'
+
+# Create message (as admin)
+curl -i -X POST "$BASE_URL/api/v1/messages/" \
+  -u "$ADMIN_CREDS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "senderId": 53,
+    "content": "Hello from admin!"
+  }'
+
+# Get all users (without credentials) MUST FAIL
+curl -i -X GET "$BASE_URL/api/v1/users/"
+
+# Get all users (as guest) MUST FAIL
+curl -i -X GET "$BASE_URL/api/v1/users/" \
+  -u "$GUEST_CREDS"
+
+# Get all users (as user) MUST FAIL
+curl -i -X GET "$BASE_URL/api/v1/users/" \
+  -u "$USER_CREDS"
+
+# Get all users (as admin)
+curl -i -X GET "$BASE_URL/api/v1/users/" \
+  -u "$ADMIN_CREDS"
+
+# Get user by ID (without credentials) MUST FAIL
+curl -i -X GET "$BASE_URL/api/v1/users/2"
+
+# Get user by ID (as guest) MUST FAIL
+curl -i -X GET "$BASE_URL/api/v1/users/2" \
+  -u "$GUEST_CREDS"
+
+# Get user by ID (as user) MUST FAIL
+curl -i -X GET "$BASE_URL/api/v1/users/2" \
+  -u "$USER_CREDS"
+
+# Get user by ID (as admin)
+curl -i -X GET "$BASE_URL/api/v1/users/2" \
+  -u "$ADMIN_CREDS"
+
+# Create user (without credentials) MUST FAIL
+curl -i -X POST "$BASE_URL/api/v1/users/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Misha",
+    "bio": "The guy from Lab 5"
+  }'
+
+# Create user (as guest) MUST FAIL
+curl -i -X POST "$BASE_URL/api/v1/users/" \
+  -u "$GUEST_CREDS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Misha",
+    "bio": "The guy from Lab 5"
+  }'
+
+# Create user (as user) MUST FAIL
+curl -i -X POST "$BASE_URL/api/v1/users/" \
+  -u "$USER_CREDS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Misha",
+    "bio": "The guy from Lab 5"
+  }'
+
+# Create user (as admin)
+curl -i -X POST "$BASE_URL/api/v1/users/" \
+  -u "$ADMIN_CREDS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Misha",
+    "bio": "The guy from Lab 5"
+  }'
+
+# Update user (without credentials) MUST FAIL
+curl -i -X PUT "$BASE_URL/api/v1/users/102" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Misha",
+    "bio": "I will stay here forever"
+  }'
+
+# Update user (as guest) MUST FAIL
+curl -i -X PUT "$BASE_URL/api/v1/users/102" \
+  -u "$GUEST_CREDS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Misha",
+    "bio": "I will stay here forever"
+  }'
+
+
+# Update user (as user) MUST FAIL
+curl -i -X PUT "$BASE_URL/api/v1/users/102" \
+  -u "$USER_CREDS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Misha",
+    "bio": "I will stay here forever"
+  }'
+
+# Update user (as admin)
+curl -i -X PUT "$BASE_URL/api/v1/users/102" \
+  -u "$ADMIN_CREDS" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Misha",
+    "bio": "I will stay here forever"
+  }'
+
+# Delete user by id (as guest) MUST FAIL
+curl -i -X DELETE "$BASE_URL/api/v1/users/1"
+
+# Delete user by id (as guest) MUST FAIL
+curl -i -X DELETE "$BASE_URL/api/v1/users/1" \
+  -u "$GUEST_CREDS"
+
+# Delete user by id (as user) MUST FAIL
+curl -i -X DELETE "$BASE_URL/api/v1/users/1" \
+  -u "$USER_CREDS"
+
+# Delete user by id (as admin)
+curl -i -X DELETE "$BASE_URL/api/v1/users/103" \
+  -u "$ADMIN_CREDS"

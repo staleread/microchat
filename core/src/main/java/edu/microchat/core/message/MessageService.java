@@ -48,7 +48,7 @@ class MessageService {
 
   @EventListener
   public void handleAssistantReply(AssistantReplyEvent event) {
-    var message = Message.assistantMessage(event.reply());
+    var message = Message.createAssistantMessage(event.reply());
 
     messageRepository.save(message).getId();
   }
