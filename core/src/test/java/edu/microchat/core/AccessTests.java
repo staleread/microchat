@@ -239,7 +239,8 @@ public class AccessTests {
         .perform(
             post("/api/v1/users/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\": \"Misha\", \"bio\": \"The guy from Lab 5\"}"))
+                .content(
+                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"bio\": \"The guy from Lab 5\", \"roles\": [\"USER\", \"GUEST\"]}"))
         .andExpect(status().isForbidden());
   }
 
@@ -247,13 +248,14 @@ public class AccessTests {
   @WithMockUser(
       username = "user",
       password = "secret",
-      roles = {"USER"})
+      roles = {"USER", "GUEST"})
   public void testCreateUserAsUser() throws Exception {
     mockMvc
         .perform(
             post("/api/v1/users/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\": \"Misha\", \"bio\": \"The guy from Lab 5\"}"))
+                .content(
+                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"bio\": \"The guy from Lab 5\", \"roles\": [\"USER\", \"GUEST\"]}"))
         .andExpect(status().isForbidden());
   }
 
@@ -267,7 +269,8 @@ public class AccessTests {
         .perform(
             post("/api/v1/users/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\": \"Misha\", \"bio\": \"The guy from Lab 5\"}"))
+                .content(
+                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"bio\": \"The guy from Lab 5\", \"roles\": [\"USER\", \"GUEST\"]}"))
         .andExpect(status().isOk());
   }
 

@@ -206,3 +206,12 @@ curl -i -X DELETE "$BASE_URL/api/v1/users/1" \
 # Delete user by id (as admin)
 curl -i -X DELETE "$BASE_URL/api/v1/users/103" \
   -u "$ADMIN_CREDS"
+
+
+# Get JWT token by credentials
+curl -s -X POST "$BASE_URL/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "guest",
+    "password": "secret"
+  }' | jq

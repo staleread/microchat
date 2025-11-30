@@ -1,16 +1,30 @@
 package edu.microchat.core.user;
 
 import java.util.List;
+import java.util.Set;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
   private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
-  public UserService(UserRepository userRepository) {
+  public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
+  }
+
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    return userRepository
+        .findByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
   }
 
   public List<UserResponse> getAll() {
@@ -57,8 +71,10 @@ public class UserService {
     userRepository.deleteById(id);
   }
 
-  private static User mapToUser(UserCreateRequest request) {
-    return new User(request.username(), request.bio());
+  private User mapToUser(UserCreateRequest request) {
+    Set<Role> roles = request.roles() != null ? request.roles() : Set.of(Role.USER, Role.GUEST);
+    String encodedPassword = passwordEncoder.encode(request.password());
+    return new User(request.username(), encodedPassword, request.bio(), roles);
   }
 
   private static UserResponse mapToUserResponse(User user) {
