@@ -2,10 +2,9 @@ package edu.microchat.core;
 
 import edu.microchat.core.common.RestTemplateResponseErrorHandler;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.amqp.RabbitTemplateCustomizer;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,12 +43,9 @@ public class CoreAppConfig {
   }
 
   @Bean
-  public RabbitTemplate rabbitTemplate(
-      ConnectionFactory connectionFactory, Jackson2JsonMessageConverter jsonConverter) {
-    var template = new RabbitTemplate(connectionFactory);
-    template.setMessageConverter(jsonConverter);
-
-    return template;
+  public RabbitTemplateCustomizer rabbitTemplateCustomizer(
+      Jackson2JsonMessageConverter jsonConverter) {
+    return (template) -> template.setMessageConverter(jsonConverter);
   }
 
   public String assistantPromptsQueueName() {
