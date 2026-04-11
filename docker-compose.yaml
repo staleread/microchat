@@ -20,6 +20,8 @@ services:
     image: staleread/microchat-eureka:latest
     ports:
       - 8761:8761
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
     depends_on:
       config:
         condition: service_healthy

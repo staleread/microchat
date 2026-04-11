@@ -236,4 +236,4 @@ gradle-app.setting
 # End of https://www.toptal.com/developers/gitignore/api/gradle,java,intellij,eclipse
 
 ### Project ###
-config-repo/
+config-repo/*-prod.yaml

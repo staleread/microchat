@@ -1,0 +1,6 @@
+[tools]
+gradle = "9"
+java = "temurin-21"
+
+[env]
+SPRING_PROFILES_ACTIVE = "dev"

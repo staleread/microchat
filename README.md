@@ -2,25 +2,42 @@
 
 ## Development
 
-### Prerequisites
+### Project setup
 
-- Java 21
-- Docker
+Install the following tools:
+
+| Tool   | Version      | Notes               |
+|--------|--------------|---------------------|
+| Java   | 21 (Temurin) |                     |
+| Gradle | 9            |                     |
+| Docker | latest       | with Compose plugin |
+
+If you use [Mise](https://mise.jdx.dev/), Java and Gradle are configured in
+`mise.toml` and installed automatically with `mise install`. Mise also sets
+`SPRING_PROFILES_ACTIVE=dev` in your shell, which is required when running
+services locally.
+
+If you don't use Mise, set the environment variable manually:
+
+```bash
+export SPRING_PROFILES_ACTIVE=dev
+```
 
 ### Config files
 
-The config server reads application configs from `~/.config/microchat/` (native profile).
-Create a file there for each service, e.g. `core.yaml`, `assistant.yaml`.
+Dev configs are committed under `config-repo/` and are picked up automatically
+— no extra setup needed.
 
-When running via Docker Compose the same directory is mounted into the container, so no extra setup is needed.
+Production configs follow the `config-repo/*-prod.yaml` pattern and are
+gitignored. Add them locally if needed.
 
 ### Building Docker images
 
 ```bash
-./gradlew :config:bootBuildImage
-./gradlew :eureka:bootBuildImage
+gradle config:bootBuildImage
+gradle eureka:bootBuildImage
 # or all at once
-./gradlew bootBuildImage
+gradle bootBuildImage
 ```
 
 ### Running infrastructure
@@ -29,11 +46,9 @@ When running via Docker Compose the same directory is mounted into the container
 docker compose up -d
 ```
 
-`eureka` waits for `config` to pass its health check before starting.
-
 ### Running services locally
 
 ```bash
-./gradlew :core:bootRun
-./gradlew :assistant:bootRun
+gradle core:bootRun
+gradle assistant:bootRun
 ```
