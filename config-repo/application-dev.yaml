@@ -6,4 +6,4 @@ eureka:
 microchat:
   queues:
     assistant-prompts: assistant.prompts
-    assistant-replies: assistant.resplies
+    assistant-replies: assistant.replies
