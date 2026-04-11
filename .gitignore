@@ -207,7 +207,7 @@ hs_err_pid*
 replay_pid*
 
 ### Gradle ###
-.gradle
+.gradle/
 **/build/
 !src/**/build/
 
@@ -234,3 +234,6 @@ gradle-app.setting
 *.hprof
 
 # End of https://www.toptal.com/developers/gitignore/api/gradle,java,intellij,eclipse
+
+### Project ###
+config-repo/
