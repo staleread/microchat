@@ -16,3 +16,7 @@ spring:
     port: 5672
     username: user
     password: password
+
+jwt:
+  secret: my-secret-jwt-secret
+  expiration: 86400000

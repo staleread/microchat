@@ -4,6 +4,7 @@ eureka:
       defaultZone: http://localhost:8761/eureka
 
 microchat:
+  moto: "Be brave!"
   queues:
     assistant-prompts: assistant.prompts
     assistant-replies: assistant.replies
