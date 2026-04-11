@@ -31,4 +31,10 @@ subprojects {
             googleJavaFormat()
         }
     }
+
+    tasks.named("bootBuildImage") {
+        imageName = "staleread/microchat-${project.name}:latest"
+        environment["BP_HEALTH_CHECKER_ENABLED"] = "true"
+        buildpacks = ["urn:cnb:builder:paketo-buildpacks/java", "docker.io/paketobuildpacks/health-checker:2.13.1"]
+    }
 }

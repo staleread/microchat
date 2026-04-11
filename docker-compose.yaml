@@ -1,6 +1,31 @@
 services:
+  config:
+    image: staleread/microchat-config:latest
+    ports:
+      - 8888:8888
+    environment:
+      - CONFIG_REPO_PATH=/config-repo
+      - THC_PATH=/actuator/health
+      - THC_PORT=8888
+    volumes:
+      - ./config-repo:/config-repo:ro
+    healthcheck:
+      test: ["CMD", "/workspace/health-check"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  eureka:
+    image: staleread/microchat-eureka:latest
+    ports:
+      - 8761:8761
+    depends_on:
+      config:
+        condition: service_healthy
+
   postgres:
-    image: postgres:17
+    image: postgres:18-alpine
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
