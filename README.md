@@ -1,4 +1,4 @@
-# micro-chat
+# microchat
 
 ## Development
 
