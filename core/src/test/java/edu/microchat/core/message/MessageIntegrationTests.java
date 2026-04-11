@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @WithMockUser(
     username = "user",
     roles = {"USER"})
-class IntegrationTests {
+class MessageIntegrationTests {
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
   @Autowired private MessageRepository messageRepository;

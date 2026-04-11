@@ -7,7 +7,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 class Message extends AbstractPersistable<Long> {
-  public static final String ASSITANT_MENTION = "/assistant";
+  public static final String ASSITANT_MENTION = "@assistant";
   public static final long ASSISTANT_ID = 0;
 
   @Column(nullable = false, updatable = false)
