@@ -105,7 +105,7 @@ class MessageIntegrationTests {
         .when(assistantApiClient)
         .sendAssistantPrompt(any(AssistantPromptDto.class));
 
-    var messageRequest = new MessageCreateRequest(1L, "Mr. /assistant, how are you?");
+    var messageRequest = new MessageCreateRequest(1L, "Mr. @assistant, how are you?");
 
     mockMvc
         .perform(
