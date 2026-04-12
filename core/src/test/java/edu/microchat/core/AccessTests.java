@@ -188,7 +188,7 @@ public class AccessTests {
             post("/api/v1/users/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"firstName\": \"Misha\", \"lastName\": \"K\", \"bio\": \"The guy from Lab 5\", \"roles\": [\"STUDENT\"]}"))
+                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"firstName\": \"Misha\", \"lastName\": \"K\", \"bio\": \"The guy from Lab 5\", \"role\": \"STUDENT\"}"))
         .andExpect(status().isUnauthorized());
   }
 
@@ -202,7 +202,7 @@ public class AccessTests {
             post("/api/v1/users/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"firstName\": \"Misha\", \"lastName\": \"K\", \"bio\": \"The guy from Lab 5\", \"roles\": [\"STUDENT\"]}"))
+                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"firstName\": \"Misha\", \"lastName\": \"K\", \"bio\": \"The guy from Lab 5\", \"role\": \"STUDENT\"}"))
         .andExpect(status().isForbidden());
   }
 
@@ -216,7 +216,7 @@ public class AccessTests {
             post("/api/v1/users/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"firstName\": \"Misha\", \"lastName\": \"K\", \"bio\": \"The guy from Lab 5\", \"roles\": [\"STUDENT\"]}"))
+                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"firstName\": \"Misha\", \"lastName\": \"K\", \"bio\": \"The guy from Lab 5\", \"role\": \"STUDENT\"}"))
         .andExpect(status().isOk());
   }
 

@@ -3,7 +3,6 @@ package edu.microchat.core.user;
 import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,11 +35,9 @@ class User extends AbstractPersistable<Long> implements UserDetails {
   @Column(nullable = true)
   private String bio;
 
-  @ElementCollection(fetch = FetchType.EAGER)
+  @Column(nullable = false)
   @Enumerated(EnumType.STRING)
-  @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-  @Column(name = "role")
-  private Set<Role> roles;
+  private Role role;
 
   public User(
       String username,
@@ -49,21 +46,19 @@ class User extends AbstractPersistable<Long> implements UserDetails {
       String lastName,
       String department,
       String bio,
-      Set<Role> roles) {
+      Role role) {
     this.username = username;
     this.password = password;
     this.firstName = firstName;
     this.lastName = lastName;
     this.department = department;
     this.bio = bio;
-    this.roles = roles;
+    this.role = role;
   }
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return roles.stream()
-        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
-        .collect(Collectors.toSet());
+    return Set.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
   }
 
   @Override

@@ -1,7 +1,6 @@
 package edu.microchat.core.user;
 
 import java.util.List;
-import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -75,7 +74,7 @@ public class UserService implements UserDetailsService {
   }
 
   private User mapToUser(UserCreateRequest request) {
-    Set<Role> roles = request.roles() != null ? request.roles() : Set.of(Role.STUDENT);
+    Role role = request.role() != null ? request.role() : Role.STUDENT;
     String encodedPassword = passwordEncoder.encode(request.password());
     return new User(
         request.username(),
@@ -84,7 +83,7 @@ public class UserService implements UserDetailsService {
         request.lastName(),
         request.department(),
         request.bio(),
-        roles);
+        role);
   }
 
   private static UserResponse mapToUserResponse(User user) {
