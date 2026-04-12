@@ -59,6 +59,9 @@ public class UserService implements UserDetailsService {
     }
 
     user.setUsername(request.username());
+    user.setFirstName(request.firstName());
+    user.setLastName(request.lastName());
+    user.setDepartment(request.department());
     user.setBio(request.bio());
     userRepository.save(user);
   }
@@ -72,12 +75,25 @@ public class UserService implements UserDetailsService {
   }
 
   private User mapToUser(UserCreateRequest request) {
-    Set<Role> roles = request.roles() != null ? request.roles() : Set.of(Role.USER, Role.GUEST);
+    Set<Role> roles = request.roles() != null ? request.roles() : Set.of(Role.STUDENT);
     String encodedPassword = passwordEncoder.encode(request.password());
-    return new User(request.username(), encodedPassword, request.bio(), roles);
+    return new User(
+        request.username(),
+        encodedPassword,
+        request.firstName(),
+        request.lastName(),
+        request.department(),
+        request.bio(),
+        roles);
   }
 
   private static UserResponse mapToUserResponse(User user) {
-    return new UserResponse(user.getId(), user.getUsername(), user.getBio());
+    return new UserResponse(
+        user.getId(),
+        user.getUsername(),
+        user.getFirstName(),
+        user.getLastName(),
+        user.getDepartment(),
+        user.getBio());
   }
 }

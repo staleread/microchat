@@ -25,21 +25,20 @@ class MessageRestController {
   }
 
   @GetMapping("/")
-  @PreAuthorize("hasRole('USER')")
+  @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR')")
   public List<MessageResponse> getAll(
       @PositiveOrZero @RequestParam("page") int page, @Positive @RequestParam("count") int count) {
     return messageService.getAll(page, count);
   }
 
   @PostMapping("/")
-  @PreAuthorize("hasRole('USER')")
+  @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR')")
   public long create(@Valid @RequestBody MessageCreateRequest request) {
     return messageService.create(request);
   }
 
   @GetMapping("/moto")
-  @PreAuthorize("hasRole('GUEST')")
-  public String getProjectMoto() {
-    return appConfig.projectMoto();
+  public String getUniversityMoto() {
+    return appConfig.universityMoto();
   }
 }

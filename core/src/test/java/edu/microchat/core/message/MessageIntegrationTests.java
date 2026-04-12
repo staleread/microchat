@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.microchat.core.assistant.AssistantApiClient;
 import edu.microchat.core.assistant.AssistantPromptDto;
-import edu.microchat.core.assistant.AssistantReplyDto;
+import edu.microchat.core.assistant.AssistantReplyEvent;
 import edu.microchat.core.user.UserResponse;
 import edu.microchat.core.user.UserService;
 import org.hamcrest.Matchers;
@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -31,8 +32,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @WithMockUser(
-    username = "user",
-    roles = {"USER"})
+    username = "student",
+    roles = {"STUDENT"})
 class MessageIntegrationTests {
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
@@ -40,6 +41,7 @@ class MessageIntegrationTests {
 
   @MockitoSpyBean private AssistantApiClient assistantApiClient;
   @MockitoBean private UserService userService;
+  @Autowired private ApplicationEventPublisher eventPublisher;
 
   @AfterEach
   void tearDown() {
@@ -64,7 +66,7 @@ class MessageIntegrationTests {
 
   @Test
   void create_RegularMessage_CreatesMessage() throws Exception {
-    var mockUserDto = new UserResponse(1L, "user1", "bio1");
+    var mockUserDto = new UserResponse(1L, "user1", "John", "Doe", null, "bio1");
     when(userService.getById(1L)).thenReturn(mockUserDto);
 
     var messageRequest = new MessageCreateRequest(1L, "Hello there!");
@@ -84,19 +86,20 @@ class MessageIntegrationTests {
 
     assertNotNull(createdMessage);
     assertEquals("Hello there!", createdMessage.getContent());
+    assertEquals(MessageSource.USER, createdMessage.getSource());
     verify(assistantApiClient, times(0)).sendAssistantPrompt(any(AssistantPromptDto.class));
   }
 
   @Test
   void create_AssistantMessage_CreatesUserAndReplyMessages() throws Exception {
-    var mockUserDto = new UserResponse(1L, "user1", "bio1");
+    var mockUserDto = new UserResponse(1L, "user1", "John", "Doe", null, "bio1");
     when(userService.getById(1L)).thenReturn(mockUserDto);
 
-    var mockReplyDto = new AssistantReplyDto("Can't complaint, bro");
+    var replyText = "Can't complaint, bro";
 
     doAnswer(
             invocation -> {
-              assistantApiClient.handleAssistantReply(mockReplyDto);
+              eventPublisher.publishEvent(new AssistantReplyEvent(replyText));
               return null;
             })
         .when(assistantApiClient)
@@ -118,7 +121,8 @@ class MessageIntegrationTests {
 
     verify(assistantApiClient, times(1)).sendAssistantPrompt(any(AssistantPromptDto.class));
     assertNotNull(lastMessage);
-    assertEquals("Can't complaint, bro", lastMessage.getContent());
+    assertEquals(replyText, lastMessage.getContent());
+    assertEquals(MessageSource.BOT, lastMessage.getSource());
   }
 
   @Test

@@ -14,13 +14,13 @@ import org.springframework.web.client.RestTemplate;
 @RefreshScope
 public class CoreAppConfig {
   @Value("${microchat.moto}")
-  private String projectMoto;
+  private String universityMoto;
 
   @Value("${microchat.queues.assistant-prompts}")
   private String assistantPromptsQueueName;
 
   @Bean
-  public RestTemplate restTemplate() {
+  RestTemplate restTemplate() {
     var restTemplate = new RestTemplate();
     restTemplate.setErrorHandler(new RestTemplateResponseErrorHandler());
 
@@ -28,23 +28,22 @@ public class CoreAppConfig {
   }
 
   @Bean
-  public Queue assistantPromptsQueue(@Value("${microchat.queues.assistant-prompts}") String name) {
+  Queue assistantPromptsQueue(@Value("${microchat.queues.assistant-prompts}") String name) {
     return new Queue(name);
   }
 
   @Bean
-  public Queue assistantRepliesQueue(@Value("${microchat.queues.assistant-replies}") String name) {
+  Queue assistantRepliesQueue(@Value("${microchat.queues.assistant-replies}") String name) {
     return new Queue(name);
   }
 
   @Bean
-  public Jackson2JsonMessageConverter jsonConverter() {
+  Jackson2JsonMessageConverter jsonConverter() {
     return new Jackson2JsonMessageConverter();
   }
 
   @Bean
-  public RabbitTemplateCustomizer rabbitTemplateCustomizer(
-      Jackson2JsonMessageConverter jsonConverter) {
+  RabbitTemplateCustomizer rabbitTemplateCustomizer(Jackson2JsonMessageConverter jsonConverter) {
     return (template) -> template.setMessageConverter(jsonConverter);
   }
 
@@ -52,7 +51,7 @@ public class CoreAppConfig {
     return assistantPromptsQueueName;
   }
 
-  public String projectMoto() {
-    return projectMoto;
+  public String universityMoto() {
+    return universityMoto;
   }
 }

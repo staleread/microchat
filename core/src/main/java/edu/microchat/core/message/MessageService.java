@@ -66,6 +66,10 @@ class MessageService {
 
   private static MessageResponse mapToMessageResponse(Message message) {
     return new MessageResponse(
-        message.getId(), message.getSenderId(), message.getContent(), message.getTimestamp());
+        message.getId(),
+        message.getSenderId(),
+        message.getContent(),
+        message.getTimestamp(),
+        message.getSource());
   }
 }

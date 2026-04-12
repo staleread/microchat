@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,12 +14,24 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "chat_user")
+@Getter
+@Setter
+@NoArgsConstructor
 class User extends AbstractPersistable<Long> implements UserDetails {
   @Column(nullable = false, unique = true)
   private String username;
 
   @Column(nullable = false)
   private String password;
+
+  @Column(nullable = false)
+  private String firstName;
+
+  @Column(nullable = false)
+  private String lastName;
+
+  @Column(nullable = true)
+  private String department;
 
   @Column(nullable = true)
   private String bio;
@@ -27,29 +42,21 @@ class User extends AbstractPersistable<Long> implements UserDetails {
   @Column(name = "role")
   private Set<Role> roles;
 
-  public User() {}
-
-  public User(String username, String password, Set<Role> roles) {
+  public User(
+      String username,
+      String password,
+      String firstName,
+      String lastName,
+      String department,
+      String bio,
+      Set<Role> roles) {
     this.username = username;
     this.password = password;
-    this.roles = roles;
-  }
-
-  public User(String username, String password, String bio, Set<Role> roles) {
-    this.username = username;
-    this.password = password;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.department = department;
     this.bio = bio;
     this.roles = roles;
-  }
-
-  @Override
-  public String getUsername() {
-    return username;
-  }
-
-  @Override
-  public String getPassword() {
-    return password;
   }
 
   @Override
@@ -77,29 +84,5 @@ class User extends AbstractPersistable<Long> implements UserDetails {
   @Override
   public boolean isEnabled() {
     return true;
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
-  }
-
-  public String getBio() {
-    return bio;
-  }
-
-  public void setBio(String bio) {
-    this.bio = bio;
-  }
-
-  public Set<Role> getRoles() {
-    return roles;
-  }
-
-  public void setRoles(Set<Role> roles) {
-    this.roles = roles;
   }
 }

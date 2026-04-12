@@ -42,6 +42,8 @@ public class CoreAppSecurityConfig {
                     .permitAll()
                     .requestMatchers("/api/v1/auth/**")
                     .permitAll()
+                    .requestMatchers("/api/v1/messages/moto")
+                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .sessionManagement(

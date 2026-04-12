@@ -32,7 +32,7 @@ public class AccessTests {
   @org.junit.jupiter.api.BeforeEach
   void setUp() {
     when(userService.getById(anyLong()))
-        .thenReturn(new UserResponse(53L, "testuser", "Test user bio"));
+        .thenReturn(new UserResponse(53L, "testuser", "Test", "User", null, "Test user bio"));
   }
 
   @Test
@@ -50,32 +50,21 @@ public class AccessTests {
   @Test
   @WithAnonymousUser
   public void testGetMotoWithoutCredentials() throws Exception {
-    mockMvc.perform(get("/api/v1/messages/moto")).andExpect(status().isUnauthorized());
-  }
-
-  @Test
-  @WithMockUser(
-      username = "guest",
-      password = "secret",
-      roles = {"GUEST"})
-  public void testGetMotoAsGuest() throws Exception {
     mockMvc.perform(get("/api/v1/messages/moto")).andExpect(status().isOk());
   }
 
   @Test
   @WithMockUser(
-      username = "user",
-      password = "secret",
-      roles = {"USER", "GUEST"})
-  public void testGetMotoAsUser() throws Exception {
+      username = "student",
+      roles = {"STUDENT"})
+  public void testGetMotoAsStudent() throws Exception {
     mockMvc.perform(get("/api/v1/messages/moto")).andExpect(status().isOk());
   }
 
   @Test
   @WithMockUser(
       username = "admin",
-      password = "secret",
-      roles = {"ADMIN", "USER", "GUEST"})
+      roles = {"ADMIN"})
   public void testGetMotoAsAdmin() throws Exception {
     mockMvc.perform(get("/api/v1/messages/moto")).andExpect(status().isOk());
   }
@@ -88,29 +77,26 @@ public class AccessTests {
 
   @Test
   @WithMockUser(
-      username = "guest",
-      password = "secret",
-      roles = {"GUEST"})
-  public void testGetMessagesAsGuest() throws Exception {
-    mockMvc.perform(get("/api/v1/messages/?page=0&count=5")).andExpect(status().isForbidden());
+      username = "student",
+      roles = {"STUDENT"})
+  public void testGetMessagesAsStudent() throws Exception {
+    mockMvc.perform(get("/api/v1/messages/?page=0&count=5")).andExpect(status().isOk());
   }
 
   @Test
   @WithMockUser(
-      username = "user",
-      password = "secret",
-      roles = {"USER", "GUEST"})
-  public void testGetMessagesAsUser() throws Exception {
+      username = "professor",
+      roles = {"PROFESSOR"})
+  public void testGetMessagesAsProfessor() throws Exception {
     mockMvc.perform(get("/api/v1/messages/?page=0&count=5")).andExpect(status().isOk());
   }
 
   @Test
   @WithMockUser(
       username = "admin",
-      password = "secret",
-      roles = {"ADMIN", "USER", "GUEST"})
+      roles = {"ADMIN"})
   public void testGetMessagesAsAdmin() throws Exception {
-    mockMvc.perform(get("/api/v1/messages/?page=0&count=5")).andExpect(status().isOk());
+    mockMvc.perform(get("/api/v1/messages/?page=0&count=5")).andExpect(status().isForbidden());
   }
 
   @Test
@@ -126,10 +112,9 @@ public class AccessTests {
 
   @Test
   @WithMockUser(
-      username = "user",
-      password = "secret",
-      roles = {"USER", "GUEST"})
-  public void testCreateMessageAsUser() throws Exception {
+      username = "student",
+      roles = {"STUDENT"})
+  public void testCreateMessageAsStudent() throws Exception {
     mockMvc
         .perform(
             post("/api/v1/messages/")
@@ -141,15 +126,14 @@ public class AccessTests {
   @Test
   @WithMockUser(
       username = "admin",
-      password = "secret",
-      roles = {"ADMIN", "USER", "GUEST"})
+      roles = {"ADMIN"})
   public void testCreateMessageAsAdmin() throws Exception {
     mockMvc
         .perform(
             post("/api/v1/messages/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"senderId\": 53, \"content\": \"Hello from admin!\"}"))
-        .andExpect(status().isOk());
+        .andExpect(status().isForbidden());
   }
 
   @Test
@@ -160,27 +144,16 @@ public class AccessTests {
 
   @Test
   @WithMockUser(
-      username = "guest",
-      password = "secret",
-      roles = {"GUEST"})
-  public void testGetAllUsersAsGuest() throws Exception {
-    mockMvc.perform(get("/api/v1/users/")).andExpect(status().isForbidden());
-  }
-
-  @Test
-  @WithMockUser(
-      username = "user",
-      password = "secret",
-      roles = {"USER"})
-  public void testGetAllUsersAsUser() throws Exception {
+      username = "student",
+      roles = {"STUDENT"})
+  public void testGetAllUsersAsStudent() throws Exception {
     mockMvc.perform(get("/api/v1/users/")).andExpect(status().isForbidden());
   }
 
   @Test
   @WithMockUser(
       username = "admin",
-      password = "secret",
-      roles = {"ADMIN", "USER", "GUEST"})
+      roles = {"ADMIN"})
   public void testGetAllUsersAsAdmin() throws Exception {
     mockMvc.perform(get("/api/v1/users/")).andExpect(status().isOk());
   }
@@ -193,27 +166,16 @@ public class AccessTests {
 
   @Test
   @WithMockUser(
-      username = "guest",
-      password = "secret",
-      roles = {"GUEST"})
-  public void testGetUserByIdAsGuest() throws Exception {
-    mockMvc.perform(get("/api/v1/users/2")).andExpect(status().isForbidden());
-  }
-
-  @Test
-  @WithMockUser(
-      username = "user",
-      password = "secret",
-      roles = {"USER"})
-  public void testGetUserByIdAsUser() throws Exception {
+      username = "student",
+      roles = {"STUDENT"})
+  public void testGetUserByIdAsStudent() throws Exception {
     mockMvc.perform(get("/api/v1/users/2")).andExpect(status().isForbidden());
   }
 
   @Test
   @WithMockUser(
       username = "admin",
-      password = "secret",
-      roles = {"ADMIN", "USER", "GUEST"})
+      roles = {"ADMIN"})
   public void testGetUserByIdAsAdmin() throws Exception {
     mockMvc.perform(get("/api/v1/users/2")).andExpect(status().isOk());
   }
@@ -225,52 +187,36 @@ public class AccessTests {
         .perform(
             post("/api/v1/users/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\": \"Misha\", \"bio\": \"The guy from Lab 5\"}"))
+                .content(
+                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"firstName\": \"Misha\", \"lastName\": \"K\", \"bio\": \"The guy from Lab 5\", \"roles\": [\"STUDENT\"]}"))
         .andExpect(status().isUnauthorized());
   }
 
   @Test
   @WithMockUser(
-      username = "guest",
-      password = "secret",
-      roles = {"GUEST"})
-  public void testCreateUserAsGuest() throws Exception {
+      username = "student",
+      roles = {"STUDENT"})
+  public void testCreateUserAsStudent() throws Exception {
     mockMvc
         .perform(
             post("/api/v1/users/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"bio\": \"The guy from Lab 5\", \"roles\": [\"USER\", \"GUEST\"]}"))
-        .andExpect(status().isForbidden());
-  }
-
-  @Test
-  @WithMockUser(
-      username = "user",
-      password = "secret",
-      roles = {"USER", "GUEST"})
-  public void testCreateUserAsUser() throws Exception {
-    mockMvc
-        .perform(
-            post("/api/v1/users/")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"bio\": \"The guy from Lab 5\", \"roles\": [\"USER\", \"GUEST\"]}"))
+                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"firstName\": \"Misha\", \"lastName\": \"K\", \"bio\": \"The guy from Lab 5\", \"roles\": [\"STUDENT\"]}"))
         .andExpect(status().isForbidden());
   }
 
   @Test
   @WithMockUser(
       username = "admin",
-      password = "secret",
-      roles = {"ADMIN", "USER", "GUEST"})
+      roles = {"ADMIN"})
   public void testCreateUserAsAdmin() throws Exception {
     mockMvc
         .perform(
             post("/api/v1/users/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"bio\": \"The guy from Lab 5\", \"roles\": [\"USER\", \"GUEST\"]}"))
+                    "{\"username\": \"Misha\", \"password\": \"secret123\", \"firstName\": \"Misha\", \"lastName\": \"K\", \"bio\": \"The guy from Lab 5\", \"roles\": [\"STUDENT\"]}"))
         .andExpect(status().isOk());
   }
 
@@ -281,49 +227,36 @@ public class AccessTests {
         .perform(
             put("/api/v1/users/102")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\": \"Misha\", \"bio\": \"I will stay here forever\"}"))
+                .content(
+                    "{\"username\": \"Misha\", \"firstName\": \"Misha\", \"lastName\": \"K\", \"bio\": \"I will stay here forever\"}"))
         .andExpect(status().isUnauthorized());
   }
 
   @Test
   @WithMockUser(
-      username = "guest",
-      password = "secret",
-      roles = {"GUEST"})
-  public void testUpdateUserAsGuest() throws Exception {
+      username = "student",
+      roles = {"STUDENT"})
+  public void testUpdateUserAsStudent() throws Exception {
     mockMvc
         .perform(
             put("/api/v1/users/102")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\": \"Misha\", \"bio\": \"I will stay here forever\"}"))
-        .andExpect(status().isForbidden());
-  }
-
-  @Test
-  @WithMockUser(
-      username = "user",
-      password = "secret",
-      roles = {"USER"})
-  public void testUpdateUserAsUser() throws Exception {
-    mockMvc
-        .perform(
-            put("/api/v1/users/102")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\": \"Misha\", \"bio\": \"I will stay here forever\"}"))
+                .content(
+                    "{\"username\": \"Misha\", \"firstName\": \"Misha\", \"lastName\": \"K\", \"bio\": \"I will stay here forever\"}"))
         .andExpect(status().isForbidden());
   }
 
   @Test
   @WithMockUser(
       username = "admin",
-      password = "secret",
-      roles = {"ADMIN", "USER", "GUEST"})
+      roles = {"ADMIN"})
   public void testUpdateUserAsAdmin() throws Exception {
     mockMvc
         .perform(
             put("/api/v1/users/102")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\": \"Misha\", \"bio\": \"I will stay here forever\"}"))
+                .content(
+                    "{\"username\": \"Misha\", \"firstName\": \"Misha\", \"lastName\": \"K\", \"bio\": \"I will stay here forever\"}"))
         .andExpect(status().isOk());
   }
 
@@ -335,27 +268,16 @@ public class AccessTests {
 
   @Test
   @WithMockUser(
-      username = "guest",
-      password = "secret",
-      roles = {"GUEST"})
-  public void testDeleteUserAsGuest() throws Exception {
-    mockMvc.perform(delete("/api/v1/users/1")).andExpect(status().isForbidden());
-  }
-
-  @Test
-  @WithMockUser(
-      username = "user",
-      password = "secret",
-      roles = {"USER"})
-  public void testDeleteUserAsUser() throws Exception {
+      username = "student",
+      roles = {"STUDENT"})
+  public void testDeleteUserAsStudent() throws Exception {
     mockMvc.perform(delete("/api/v1/users/1")).andExpect(status().isForbidden());
   }
 
   @Test
   @WithMockUser(
       username = "admin",
-      password = "secret",
-      roles = {"ADMIN", "USER", "GUEST"})
+      roles = {"ADMIN"})
   public void testDeleteUserAsAdmin() throws Exception {
     mockMvc.perform(delete("/api/v1/users/103")).andExpect(status().isOk());
   }
