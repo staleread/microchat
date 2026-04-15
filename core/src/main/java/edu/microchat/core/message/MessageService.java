@@ -58,7 +58,11 @@ class MessageService {
 
   public ApiResponse<BaseMetadata, MessageDto> getAllAsApiResponse(int page, int count) {
     try {
-      return new ApiResponse<>(BaseMetadata.success(200), getAll(page, count));
+      List<MessageDto> messages = getAll(page, count);
+      if (messages.isEmpty()) {
+        return new ApiResponse<>(BaseMetadata.error(404, "No messages found"));
+      }
+      return new ApiResponse<>(BaseMetadata.success(200), messages);
     } catch (ResponseStatusException e) {
       return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
     }

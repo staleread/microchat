@@ -77,7 +77,11 @@ public class UserService implements UserDetailsService {
 
   public ApiResponse<BaseMetadata, UserDto> getAllAsApiResponse() {
     try {
-      return new ApiResponse<>(BaseMetadata.success(200), getAll());
+      List<UserDto> users = getAll();
+      if (users.isEmpty()) {
+        return new ApiResponse<>(BaseMetadata.error(404, "No users found"));
+      }
+      return new ApiResponse<>(BaseMetadata.success(200), users);
     } catch (ResponseStatusException e) {
       return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
     }
