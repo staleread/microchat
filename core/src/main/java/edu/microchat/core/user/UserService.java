@@ -76,25 +76,45 @@ public class UserService implements UserDetailsService {
   }
 
   public ApiResponse<BaseMetadata, UserDto> getAllAsApiResponse() {
-    return new ApiResponse<>(BaseMetadata.success(200), getAll());
+    try {
+      return new ApiResponse<>(BaseMetadata.success(200), getAll());
+    } catch (ResponseStatusException e) {
+      return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
+    }
   }
 
   public ApiResponse<BaseMetadata, UserDto> getByIdAsApiResponse(long id) {
-    return new ApiResponse<>(BaseMetadata.success(200), getById(id));
+    try {
+      return new ApiResponse<>(BaseMetadata.success(200), getById(id));
+    } catch (ResponseStatusException e) {
+      return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
+    }
   }
 
   public ApiResponse<BaseMetadata, Long> createAsApiResponse(UserCreateRequest request) {
-    return new ApiResponse<>(BaseMetadata.success(200), create(request));
+    try {
+      return new ApiResponse<>(BaseMetadata.success(200), create(request));
+    } catch (ResponseStatusException e) {
+      return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
+    }
   }
 
   public ApiResponse<BaseMetadata, Void> updateAsApiResponse(long id, UserUpdateRequest request) {
-    update(id, request);
-    return new ApiResponse<>(BaseMetadata.success(200));
+    try {
+      update(id, request);
+      return new ApiResponse<>(BaseMetadata.success(200));
+    } catch (ResponseStatusException e) {
+      return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
+    }
   }
 
   public ApiResponse<BaseMetadata, Void> deleteAsApiResponse(long id) {
-    delete(id);
-    return new ApiResponse<>(BaseMetadata.success(200));
+    try {
+      delete(id);
+      return new ApiResponse<>(BaseMetadata.success(200));
+    } catch (ResponseStatusException e) {
+      return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
+    }
   }
 
   private User mapToUser(UserCreateRequest request) {
