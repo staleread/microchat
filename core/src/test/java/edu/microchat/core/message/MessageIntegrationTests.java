@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.microchat.core.assistant.AssistantApiClient;
 import edu.microchat.core.assistant.AssistantPromptDto;
 import edu.microchat.core.assistant.AssistantReplyEvent;
-import edu.microchat.core.user.UserResponse;
+import edu.microchat.core.user.UserDto;
 import edu.microchat.core.user.UserService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -23,7 +23,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -57,21 +56,21 @@ class MessageIntegrationTests {
     mockMvc
         .perform(get("/api/v1/messages/?page=0&count=2"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$.length()").value(2))
-        .andExpect(jsonPath("$[0].senderId").value(1))
-        .andExpect(jsonPath("$[0].content").value("My ID is 1"))
-        .andExpect(jsonPath("$[1].content").value("Who are you?"));
+        .andExpect(jsonPath("$.data").isArray())
+        .andExpect(jsonPath("$.data.length()").value(2))
+        .andExpect(jsonPath("$.data[0].senderId").value(1))
+        .andExpect(jsonPath("$.data[0].content").value("My ID is 1"))
+        .andExpect(jsonPath("$.data[1].content").value("Who are you?"));
   }
 
   @Test
   void create_RegularMessage_CreatesMessage() throws Exception {
-    var mockUserDto = new UserResponse(1L, "user1", "John", "Doe", null, "bio1");
+    var mockUserDto = new UserDto(1L, "user1", "John", "Doe", null, "bio1");
     when(userService.getById(1L)).thenReturn(mockUserDto);
 
     var messageRequest = new MessageCreateRequest(1L, "Hello there!");
 
-    MockHttpServletResponse response =
+    String responseContent =
         mockMvc
             .perform(
                 post("/api/v1/messages/")
@@ -79,9 +78,10 @@ class MessageIntegrationTests {
                     .content(toJson(messageRequest)))
             .andExpect(status().isOk())
             .andReturn()
-            .getResponse();
+            .getResponse()
+            .getContentAsString();
 
-    var messageId = Long.parseLong(response.getContentAsString());
+    var messageId = objectMapper.readTree(responseContent).get("data").get(0).asLong();
     Message createdMessage = messageRepository.findById(messageId).orElse(null);
 
     assertNotNull(createdMessage);
@@ -92,7 +92,7 @@ class MessageIntegrationTests {
 
   @Test
   void create_AssistantMessage_CreatesUserAndReplyMessages() throws Exception {
-    var mockUserDto = new UserResponse(1L, "user1", "John", "Doe", null, "bio1");
+    var mockUserDto = new UserDto(1L, "user1", "John", "Doe", null, "bio1");
     when(userService.getById(1L)).thenReturn(mockUserDto);
 
     var replyText = "Can't complaint, bro";

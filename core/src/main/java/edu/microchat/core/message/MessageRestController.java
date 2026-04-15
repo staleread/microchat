@@ -1,10 +1,11 @@
 package edu.microchat.core.message;
 
 import edu.microchat.core.CoreAppConfig;
+import edu.microchat.core.common.ApiResponse;
+import edu.microchat.core.common.BaseMetadata;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
-import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,15 +27,15 @@ class MessageRestController {
 
   @GetMapping("/")
   @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR')")
-  public List<MessageResponse> getAll(
+  public ApiResponse<BaseMetadata, MessageDto> getAll(
       @PositiveOrZero @RequestParam("page") int page, @Positive @RequestParam("count") int count) {
-    return messageService.getAll(page, count);
+    return messageService.getAllAsApiResponse(page, count);
   }
 
   @PostMapping("/")
   @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR')")
-  public long create(@Valid @RequestBody MessageCreateRequest request) {
-    return messageService.create(request);
+  public ApiResponse<BaseMetadata, Long> create(@Valid @RequestBody MessageCreateRequest request) {
+    return messageService.createAsApiResponse(request);
   }
 
   @GetMapping("/moto")

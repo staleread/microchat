@@ -3,7 +3,9 @@ package edu.microchat.core.message;
 import edu.microchat.core.assistant.AssistantApiClient;
 import edu.microchat.core.assistant.AssistantPromptDto;
 import edu.microchat.core.assistant.AssistantReplyEvent;
-import edu.microchat.core.user.UserResponse;
+import edu.microchat.core.common.ApiResponse;
+import edu.microchat.core.common.BaseMetadata;
+import edu.microchat.core.user.UserDto;
 import edu.microchat.core.user.UserService;
 import java.util.List;
 import org.springframework.context.event.EventListener;
@@ -25,18 +27,18 @@ class MessageService {
     this.messageRepository = messageRepository;
   }
 
-  public List<MessageResponse> getAll(int page, int count) {
+  public List<MessageDto> getAll(int page, int count) {
     var pageable = PageRequest.of(page, count);
 
     return messageRepository.findAllByOrderByTimestampDesc(pageable).stream()
-        .map(MessageService::mapToMessageResponse)
+        .map(MessageService::mapToMessageDto)
         .toList();
   }
 
   public long create(MessageCreateRequest request) {
     Message message = mapToMessage(request);
 
-    UserResponse user = userService.getById(message.getSenderId());
+    UserDto user = userService.getById(message.getSenderId());
 
     if (message.isAssistantPrompt()) {
       AssistantPromptDto dto = mapToAssistantPromptDto(user, message);
@@ -53,7 +55,15 @@ class MessageService {
     messageRepository.save(message).getId();
   }
 
-  private static AssistantPromptDto mapToAssistantPromptDto(UserResponse userDto, Message message) {
+  public ApiResponse<BaseMetadata, MessageDto> getAllAsApiResponse(int page, int count) {
+    return new ApiResponse<>(BaseMetadata.success(200), getAll(page, count));
+  }
+
+  public ApiResponse<BaseMetadata, Long> createAsApiResponse(MessageCreateRequest request) {
+    return new ApiResponse<>(BaseMetadata.success(200), create(request));
+  }
+
+  private static AssistantPromptDto mapToAssistantPromptDto(UserDto userDto, Message message) {
     var messageSender =
         new AssistantPromptDto.MessageSender(userDto.id(), userDto.username(), userDto.bio());
 
@@ -64,8 +74,8 @@ class MessageService {
     return new Message(request.senderId(), request.content());
   }
 
-  private static MessageResponse mapToMessageResponse(Message message) {
-    return new MessageResponse(
+  private static MessageDto mapToMessageDto(Message message) {
+    return new MessageDto(
         message.getId(),
         message.getSenderId(),
         message.getContent(),
