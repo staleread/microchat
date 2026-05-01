@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import edu.microchat.core.assistant.AssistantApiClient;
 import edu.microchat.core.common.ApiResponse;
 import edu.microchat.core.common.BaseMetadata;
+import edu.microchat.core.common.PaginationMetadata;
+import edu.microchat.core.common.PaginationRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,24 +30,14 @@ class UserServiceTests {
   }
 
   @Test
-  void getAllAsApiResponse_UsersExist_ReturnsSuccessWithAllUsers() {
-    ApiResponse<BaseMetadata, UserDto> response = underTest.getAllAsApiResponse();
+  void getUsersPageAsApiResponse_UsersExist_ReturnsSuccessWithPage() {
+    ApiResponse<PaginationMetadata, UserDto> response =
+        underTest.getUsersPageAsApiResponse(new PaginationRequest(0, 50));
 
     assertTrue(response.getMeta().isSuccess());
     assertEquals(200, response.getMeta().getCode());
     assertNull(response.getMeta().getErrorMessage());
     assertEquals(30, response.getData().size());
-  }
-
-  @Test
-  void getAllAsApiResponse_NoUsers_ReturnsNotFound() {
-    userRepository.deleteAll();
-
-    ApiResponse<BaseMetadata, UserDto> response = underTest.getAllAsApiResponse();
-
-    assertFalse(response.getMeta().isSuccess());
-    assertEquals(404, response.getMeta().getCode());
-    assertNull(response.getData());
   }
 
   @Test
@@ -69,7 +61,8 @@ class UserServiceTests {
 
   @Test
   void createAsApiResponse_NewUsername_ReturnsSuccessWithId() {
-    var request = new UserCreateRequest("newuser", "password123", "John", "Doe", null, null, Role.STUDENT);
+    var request =
+        new UserCreateRequest("newuser", "password123", "John", "Doe", null, null, Role.STUDENT);
 
     ApiResponse<BaseMetadata, Long> response = underTest.createAsApiResponse(request);
 
@@ -81,7 +74,8 @@ class UserServiceTests {
 
   @Test
   void createAsApiResponse_DuplicateUsername_ReturnsBadRequest() {
-    var request = new UserCreateRequest("dgingell0", "password123", "John", "Doe", null, null, Role.STUDENT);
+    var request =
+        new UserCreateRequest("dgingell0", "password123", "John", "Doe", null, null, Role.STUDENT);
 
     ApiResponse<BaseMetadata, Long> response = underTest.createAsApiResponse(request);
 

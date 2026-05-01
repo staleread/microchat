@@ -1,5 +1,6 @@
 package edu.microchat.core;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -8,9 +9,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import edu.microchat.core.assistant.AssistantApiClient;
 import edu.microchat.core.common.ApiResponse;
 import edu.microchat.core.common.BaseMetadata;
+import edu.microchat.core.common.PaginationMetadata;
 import edu.microchat.core.user.UserDto;
-import java.util.List;
 import edu.microchat.core.user.UserService;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,6 +38,10 @@ public class AccessTests {
   void setUp() {
     var userDto = new UserDto(53L, "testuser", "Test", "User", null, "Test user bio");
     when(userService.getById(anyLong())).thenReturn(userDto);
+    when(userService.getUsersPageAsApiResponse(any()))
+        .thenReturn(
+            new ApiResponse<>(
+                PaginationMetadata.builder().code(200).success(true).build(), List.of()));
     when(userService.getAllAsApiResponse())
         .thenReturn(new ApiResponse<>(BaseMetadata.success(200), List.of()));
     when(userService.getByIdAsApiResponse(anyLong()))
@@ -79,7 +85,7 @@ public class AccessTests {
   @Test
   @WithAnonymousUser
   public void testGetMessagesWithoutCredentials() throws Exception {
-    mockMvc.perform(get("/api/v1/messages/?page=0&count=5")).andExpect(status().isUnauthorized());
+    mockMvc.perform(get("/api/v1/messages/all")).andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -87,7 +93,7 @@ public class AccessTests {
       username = "student",
       roles = {"STUDENT"})
   public void testGetMessagesAsStudent() throws Exception {
-    mockMvc.perform(get("/api/v1/messages/?page=0&count=5")).andExpect(status().isOk());
+    mockMvc.perform(get("/api/v1/messages/all")).andExpect(status().isOk());
   }
 
   @Test
@@ -95,7 +101,7 @@ public class AccessTests {
       username = "professor",
       roles = {"PROFESSOR"})
   public void testGetMessagesAsProfessor() throws Exception {
-    mockMvc.perform(get("/api/v1/messages/?page=0&count=5")).andExpect(status().isOk());
+    mockMvc.perform(get("/api/v1/messages/all")).andExpect(status().isOk());
   }
 
   @Test
@@ -103,7 +109,7 @@ public class AccessTests {
       username = "admin",
       roles = {"ADMIN"})
   public void testGetMessagesAsAdmin() throws Exception {
-    mockMvc.perform(get("/api/v1/messages/?page=0&count=5")).andExpect(status().isForbidden());
+    mockMvc.perform(get("/api/v1/messages/all")).andExpect(status().isForbidden());
   }
 
   @Test
@@ -146,7 +152,7 @@ public class AccessTests {
   @Test
   @WithAnonymousUser
   public void testGetAllUsersWithoutCredentials() throws Exception {
-    mockMvc.perform(get("/api/v1/users/")).andExpect(status().isUnauthorized());
+    mockMvc.perform(get("/api/v1/users/all")).andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -154,7 +160,7 @@ public class AccessTests {
       username = "student",
       roles = {"STUDENT"})
   public void testGetAllUsersAsStudent() throws Exception {
-    mockMvc.perform(get("/api/v1/users/")).andExpect(status().isForbidden());
+    mockMvc.perform(get("/api/v1/users/all")).andExpect(status().isForbidden());
   }
 
   @Test
@@ -162,7 +168,7 @@ public class AccessTests {
       username = "admin",
       roles = {"ADMIN"})
   public void testGetAllUsersAsAdmin() throws Exception {
-    mockMvc.perform(get("/api/v1/users/")).andExpect(status().isOk());
+    mockMvc.perform(get("/api/v1/users/all")).andExpect(status().isOk());
   }
 
   @Test

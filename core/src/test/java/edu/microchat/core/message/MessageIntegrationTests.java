@@ -54,7 +54,7 @@ class MessageIntegrationTests {
     messageRepository.save(new Message(1, "My ID is 1"));
 
     mockMvc
-        .perform(get("/api/v1/messages/?page=0&count=2"))
+        .perform(get("/api/v1/messages/?page=0&size=2"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data").isArray())
         .andExpect(jsonPath("$.data.length()").value(2))
@@ -117,7 +117,7 @@ class MessageIntegrationTests {
     await().atMost(5, SECONDS).until(messageRepository::count, Matchers.equalTo(2L));
 
     Message lastMessage =
-        messageRepository.findAllByOrderByTimestampDesc(PageRequest.of(0, 1)).getFirst();
+        messageRepository.findAllByOrderByTimestampDesc(PageRequest.of(0, 1)).getContent().get(0);
 
     verify(assistantApiClient, times(1)).sendAssistantPrompt(any(AssistantPromptDto.class));
     assertNotNull(lastMessage);
