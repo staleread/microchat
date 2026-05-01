@@ -5,13 +5,16 @@ import edu.microchat.core.assistant.AssistantPromptDto;
 import edu.microchat.core.assistant.AssistantReplyEvent;
 import edu.microchat.core.common.ApiResponse;
 import edu.microchat.core.common.BaseMetadata;
+import edu.microchat.core.common.PaginationMetadata;
+import edu.microchat.core.common.PaginationRequest;
 import edu.microchat.core.user.UserDto;
 import edu.microchat.core.user.UserService;
 import java.util.List;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 class MessageService {
@@ -26,14 +29,6 @@ class MessageService {
     this.assistantApiClient = assistantApiClientService;
     this.userService = userService;
     this.messageRepository = messageRepository;
-  }
-
-  public List<MessageDto> getAll(int page, int count) {
-    var pageable = PageRequest.of(page, count);
-
-    return messageRepository.findAllByOrderByTimestampDesc(pageable).stream()
-        .map(MessageService::mapToMessageDto)
-        .toList();
   }
 
   public long create(MessageCreateRequest request) {
@@ -56,9 +51,13 @@ class MessageService {
     messageRepository.save(message).getId();
   }
 
-  public ApiResponse<BaseMetadata, MessageDto> getAllAsApiResponse(int page, int count) {
+  public List<MessageDto> getAll() {
+    return messageRepository.findAll().stream().map(MessageService::mapToMessageDto).toList();
+  }
+
+  public ApiResponse<BaseMetadata, MessageDto> getAllAsApiResponse() {
     try {
-      List<MessageDto> messages = getAll(page, count);
+      List<MessageDto> messages = getAll();
       if (messages.isEmpty()) {
         return new ApiResponse<>(BaseMetadata.error(404, "No messages found"));
       }
@@ -74,6 +73,39 @@ class MessageService {
     } catch (ResponseStatusException e) {
       return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
     }
+  }
+
+  public ApiResponse<PaginationMetadata, MessageDto> getMessagesPageAsApiResponse(
+      PaginationRequest request) {
+    if (request.page() < 0) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Page index must not be less than zero");
+    }
+    if (request.size() < 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page size must not be less than one");
+    }
+
+    var pageable = PageRequest.of(request.page(), request.size());
+    var page = messageRepository.findAllByOrderByTimestampDesc(pageable);
+
+    if (request.page() > 0 && request.page() >= page.getTotalPages() && page.getTotalElements() > 0) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page index out of range");
+    }
+
+    var meta =
+        PaginationMetadata.builder()
+            .code(200)
+            .success(true)
+            .number(page.getNumber())
+            .size(page.getSize())
+            .totalElements(page.getTotalElements())
+            .totalPages(page.getTotalPages())
+            .isFirst(page.isFirst())
+            .isLast(page.isLast())
+            .build();
+
+    return new ApiResponse<>(
+        meta, page.getContent().stream().map(MessageService::mapToMessageDto).toList());
   }
 
   private static AssistantPromptDto mapToAssistantPromptDto(UserDto userDto, Message message) {

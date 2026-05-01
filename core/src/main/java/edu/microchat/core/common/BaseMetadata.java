@@ -1,10 +1,16 @@
 package edu.microchat.core.common;
 
-import lombok.Getter;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
 public class BaseMetadata {
   private int code;
   private boolean success;
@@ -16,10 +22,10 @@ public class BaseMetadata {
   }
 
   public static BaseMetadata success(int code) {
-    return new BaseMetadata(code, true, null);
+    return BaseMetadata.builder().code(code).success(true).build();
   }
 
   public static BaseMetadata error(int code, String message) {
-    return new BaseMetadata(code, false, message);
+    return BaseMetadata.builder().code(code).success(false).errorMessage(message).build();
   }
 }

@@ -2,7 +2,10 @@ package edu.microchat.core.user;
 
 import edu.microchat.core.common.ApiResponse;
 import edu.microchat.core.common.BaseMetadata;
+import edu.microchat.core.common.PaginationMetadata;
+import edu.microchat.core.common.PaginationRequest;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -119,6 +122,39 @@ public class UserService implements UserDetailsService {
     } catch (ResponseStatusException e) {
       return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
     }
+  }
+
+  public ApiResponse<PaginationMetadata, UserDto> getUsersPageAsApiResponse(
+      PaginationRequest request) {
+    if (request.page() < 0) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Page index must not be less than zero");
+    }
+    if (request.size() < 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page size must not be less than one");
+    }
+
+    var pageable = PageRequest.of(request.page(), request.size());
+    var page = userRepository.findAll(pageable);
+
+    if (request.page() > 0 && request.page() >= page.getTotalPages() && page.getTotalElements() > 0) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page index out of range");
+    }
+
+    var meta =
+        PaginationMetadata.builder()
+            .code(200)
+            .success(true)
+            .number(page.getNumber())
+            .size(page.getSize())
+            .totalElements(page.getTotalElements())
+            .totalPages(page.getTotalPages())
+            .isFirst(page.isFirst())
+            .isLast(page.isLast())
+            .build();
+
+    return new ApiResponse<>(
+        meta, page.getContent().stream().map(UserService::mapToUserDto).toList());
   }
 
   private User mapToUser(UserCreateRequest request) {

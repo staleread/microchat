@@ -2,6 +2,8 @@ package edu.microchat.core.user;
 
 import edu.microchat.core.common.ApiResponse;
 import edu.microchat.core.common.BaseMetadata;
+import edu.microchat.core.common.PaginationMetadata;
+import edu.microchat.core.common.PaginationRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +26,12 @@ class UserRestController {
   }
 
   @GetMapping("/")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<PaginationMetadata, UserDto> getAll(@Valid PaginationRequest request) {
+    return userService.getUsersPageAsApiResponse(request);
+  }
+
+  @GetMapping("/all")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<BaseMetadata, UserDto> getAll() {
     return userService.getAllAsApiResponse();

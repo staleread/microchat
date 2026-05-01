@@ -1,9 +1,9 @@
 package edu.microchat.core.message;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-interface MessageRepository extends ListCrudRepository<Message, Long> {
-  List<Message> findAllByOrderByTimestampDesc(Pageable pageable);
+interface MessageRepository extends JpaRepository<Message, Long> {
+  Page<Message> findAllByOrderByTimestampDesc(Pageable pageable);
 }
