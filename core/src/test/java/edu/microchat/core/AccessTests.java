@@ -6,7 +6,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import edu.microchat.core.assistant.AssistantApiClient;
-import edu.microchat.core.user.UserResponse;
+import edu.microchat.core.common.ApiResponse;
+import edu.microchat.core.common.BaseMetadata;
+import edu.microchat.core.user.UserDto;
+import java.util.List;
 import edu.microchat.core.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +34,12 @@ public class AccessTests {
 
   @org.junit.jupiter.api.BeforeEach
   void setUp() {
-    when(userService.getById(anyLong()))
-        .thenReturn(new UserResponse(53L, "testuser", "Test", "User", null, "Test user bio"));
+    var userDto = new UserDto(53L, "testuser", "Test", "User", null, "Test user bio");
+    when(userService.getById(anyLong())).thenReturn(userDto);
+    when(userService.getAllAsApiResponse())
+        .thenReturn(new ApiResponse<>(BaseMetadata.success(200), List.of()));
+    when(userService.getByIdAsApiResponse(anyLong()))
+        .thenReturn(new ApiResponse<>(BaseMetadata.success(200), userDto));
   }
 
   @Test

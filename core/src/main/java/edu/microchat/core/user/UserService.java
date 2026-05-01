@@ -1,5 +1,7 @@
 package edu.microchat.core.user;
 
+import edu.microchat.core.common.ApiResponse;
+import edu.microchat.core.common.BaseMetadata;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,14 +28,14 @@ public class UserService implements UserDetailsService {
         .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
   }
 
-  public List<UserResponse> getAll() {
-    return userRepository.findAll().stream().map(UserService::mapToUserResponse).toList();
+  public List<UserDto> getAll() {
+    return userRepository.findAll().stream().map(UserService::mapToUserDto).toList();
   }
 
-  public UserResponse getById(long id) {
+  public UserDto getById(long id) {
     return userRepository
         .findById(id)
-        .map(UserService::mapToUserResponse)
+        .map(UserService::mapToUserDto)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
   }
 
@@ -73,6 +75,52 @@ public class UserService implements UserDetailsService {
     userRepository.deleteById(id);
   }
 
+  public ApiResponse<BaseMetadata, UserDto> getAllAsApiResponse() {
+    try {
+      List<UserDto> users = getAll();
+      if (users.isEmpty()) {
+        return new ApiResponse<>(BaseMetadata.error(404, "No users found"));
+      }
+      return new ApiResponse<>(BaseMetadata.success(200), users);
+    } catch (ResponseStatusException e) {
+      return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
+    }
+  }
+
+  public ApiResponse<BaseMetadata, UserDto> getByIdAsApiResponse(long id) {
+    try {
+      return new ApiResponse<>(BaseMetadata.success(200), getById(id));
+    } catch (ResponseStatusException e) {
+      return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
+    }
+  }
+
+  public ApiResponse<BaseMetadata, Long> createAsApiResponse(UserCreateRequest request) {
+    try {
+      return new ApiResponse<>(BaseMetadata.success(200), create(request));
+    } catch (ResponseStatusException e) {
+      return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
+    }
+  }
+
+  public ApiResponse<BaseMetadata, Void> updateAsApiResponse(long id, UserUpdateRequest request) {
+    try {
+      update(id, request);
+      return new ApiResponse<>(BaseMetadata.success(200));
+    } catch (ResponseStatusException e) {
+      return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
+    }
+  }
+
+  public ApiResponse<BaseMetadata, Void> deleteAsApiResponse(long id) {
+    try {
+      delete(id);
+      return new ApiResponse<>(BaseMetadata.success(200));
+    } catch (ResponseStatusException e) {
+      return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
+    }
+  }
+
   private User mapToUser(UserCreateRequest request) {
     Role role = request.role() != null ? request.role() : Role.STUDENT;
     String encodedPassword = passwordEncoder.encode(request.password());
@@ -86,8 +134,8 @@ public class UserService implements UserDetailsService {
         role);
   }
 
-  private static UserResponse mapToUserResponse(User user) {
-    return new UserResponse(
+  private static UserDto mapToUserDto(User user) {
+    return new UserDto(
         user.getId(),
         user.getUsername(),
         user.getFirstName(),

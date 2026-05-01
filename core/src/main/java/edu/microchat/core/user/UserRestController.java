@@ -1,8 +1,9 @@
 package edu.microchat.core.user;
 
+import edu.microchat.core.common.ApiResponse;
+import edu.microchat.core.common.BaseMetadata;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,32 +25,32 @@ class UserRestController {
 
   @GetMapping("/")
   @PreAuthorize("hasRole('ADMIN')")
-  public List<UserResponse> getAll() {
-    return userService.getAll();
+  public ApiResponse<BaseMetadata, UserDto> getAll() {
+    return userService.getAllAsApiResponse();
   }
 
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  public UserResponse getById(@Positive @PathVariable long id) {
-    return userService.getById(id);
+  public ApiResponse<BaseMetadata, UserDto> getById(@Positive @PathVariable long id) {
+    return userService.getByIdAsApiResponse(id);
   }
 
   @PostMapping("/")
   @PreAuthorize("hasRole('ADMIN')")
-  public Long create(@Valid @RequestBody UserCreateRequest request) {
-    return userService.create(request);
+  public ApiResponse<BaseMetadata, Long> create(@Valid @RequestBody UserCreateRequest request) {
+    return userService.createAsApiResponse(request);
   }
 
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  public void update(
+  public ApiResponse<BaseMetadata, Void> update(
       @Positive @PathVariable long id, @Valid @RequestBody UserUpdateRequest request) {
-    userService.update(id, request);
+    return userService.updateAsApiResponse(id, request);
   }
 
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  public void delete(@Positive @PathVariable long id) {
-    userService.delete(id);
+  public ApiResponse<BaseMetadata, Void> delete(@Positive @PathVariable long id) {
+    return userService.deleteAsApiResponse(id);
   }
 }

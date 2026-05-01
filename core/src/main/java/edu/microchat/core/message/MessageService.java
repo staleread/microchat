@@ -3,9 +3,12 @@ package edu.microchat.core.message;
 import edu.microchat.core.assistant.AssistantApiClient;
 import edu.microchat.core.assistant.AssistantPromptDto;
 import edu.microchat.core.assistant.AssistantReplyEvent;
-import edu.microchat.core.user.UserResponse;
+import edu.microchat.core.common.ApiResponse;
+import edu.microchat.core.common.BaseMetadata;
+import edu.microchat.core.user.UserDto;
 import edu.microchat.core.user.UserService;
 import java.util.List;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -25,18 +28,18 @@ class MessageService {
     this.messageRepository = messageRepository;
   }
 
-  public List<MessageResponse> getAll(int page, int count) {
+  public List<MessageDto> getAll(int page, int count) {
     var pageable = PageRequest.of(page, count);
 
     return messageRepository.findAllByOrderByTimestampDesc(pageable).stream()
-        .map(MessageService::mapToMessageResponse)
+        .map(MessageService::mapToMessageDto)
         .toList();
   }
 
   public long create(MessageCreateRequest request) {
     Message message = mapToMessage(request);
 
-    UserResponse user = userService.getById(message.getSenderId());
+    UserDto user = userService.getById(message.getSenderId());
 
     if (message.isAssistantPrompt()) {
       AssistantPromptDto dto = mapToAssistantPromptDto(user, message);
@@ -53,7 +56,27 @@ class MessageService {
     messageRepository.save(message).getId();
   }
 
-  private static AssistantPromptDto mapToAssistantPromptDto(UserResponse userDto, Message message) {
+  public ApiResponse<BaseMetadata, MessageDto> getAllAsApiResponse(int page, int count) {
+    try {
+      List<MessageDto> messages = getAll(page, count);
+      if (messages.isEmpty()) {
+        return new ApiResponse<>(BaseMetadata.error(404, "No messages found"));
+      }
+      return new ApiResponse<>(BaseMetadata.success(200), messages);
+    } catch (ResponseStatusException e) {
+      return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
+    }
+  }
+
+  public ApiResponse<BaseMetadata, Long> createAsApiResponse(MessageCreateRequest request) {
+    try {
+      return new ApiResponse<>(BaseMetadata.success(200), create(request));
+    } catch (ResponseStatusException e) {
+      return new ApiResponse<>(BaseMetadata.error(e.getStatusCode().value(), e.getReason()));
+    }
+  }
+
+  private static AssistantPromptDto mapToAssistantPromptDto(UserDto userDto, Message message) {
     var messageSender =
         new AssistantPromptDto.MessageSender(userDto.id(), userDto.username(), userDto.bio());
 
@@ -64,8 +87,8 @@ class MessageService {
     return new Message(request.senderId(), request.content());
   }
 
-  private static MessageResponse mapToMessageResponse(Message message) {
-    return new MessageResponse(
+  private static MessageDto mapToMessageDto(Message message) {
+    return new MessageDto(
         message.getId(),
         message.getSenderId(),
         message.getContent(),
